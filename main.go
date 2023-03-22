@@ -1,36 +1,24 @@
 package main
 
 import (
-	"fmt"
-	"math/rand"
-	"time"
-
 	applikationssg "github.com/cricton/applikations-sg"
+	commmiddleware "github.com/cricton/comm-middleware"
 )
 
-func coroutineTest() {
-
-	for i := 0; i < 100; i++ {
-		time.Sleep(time.Duration(rand.Intn(10)) * time.Millisecond)
-
-		fmt.Println(i)
-	}
-}
 func main() {
 
 	//start HMI-SG
 	//start Applikations-SG
 
-	//TODO read this from config file
+	//TODO read this from config file?
 	sg1 := &applikationssg.Airbacksg{
-		ControlUnit: &applikationssg.ControlUnit{Name: "Airback System"},
+		ControlUnit: &applikationssg.ControlUnit{},
 	}
+	middleware := &commmiddleware.Middleware{CurrentMsgID: 0}
+
+	//create channel for sg-middleware interaction
+	sg1.ControlUnit.CreateChannel(*middleware)
 
 	//hmi := hmisg.HMI{}
-
-	go coroutineTest()
-	go coroutineTest()
-	coroutineTest()
-	fmt.Println(sg1.ControlUnit.GetName())
 
 }

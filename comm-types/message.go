@@ -1,4 +1,4 @@
-package commmiddleware
+package commtypes
 
 type Message struct {
 	MsgID      int16
