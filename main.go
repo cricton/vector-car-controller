@@ -14,10 +14,14 @@ func main() {
 	sg1 := &applikationssg.Airbacksg{
 		ControlUnit: &applikationssg.ControlUnit{},
 	}
+
 	middleware := &commmiddleware.Middleware{CurrentMsgID: 0}
 
 	//create channel for sg-middleware interaction
-	sg1.ControlUnit.CreateChannel(*middleware)
+	sg1.ControlUnit.CreateChannel(middleware)
+
+	go middleware.Mainloop()
+	sg1.Mainloop()
 
 	//hmi := hmisg.HMI{}
 

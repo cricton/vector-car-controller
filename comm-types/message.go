@@ -6,3 +6,7 @@ type Message struct {
 	ReceiverID int16
 	Content    string
 }
+
+const (
+	MHIID = 0
+)
