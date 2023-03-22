@@ -13,12 +13,13 @@ type HMI struct {
 	Channel chan commtypes.Message
 }
 
-func HMI_main_loop() int {
-
+func (hmi HMI) HMI_main_loop() int {
+	fmt.Println("Starting HMI module...")
 	for {
-		msg_channel := make(chan commtypes.Message)
-		msg := <-msg_channel
-		handleMessage(msg)
+
+		msg := <-hmi.Channel
+		response := handleMessage(msg)
+		hmi.Channel <- response
 	}
 
 }
@@ -26,12 +27,23 @@ func HMI_main_loop() int {
 // creates a new channel and adds it to the Middleware and the controlUnit
 func (hmi *HMI) CreateChannel(commmiddleware *commmiddleware.Middleware) {
 	channel := make(chan commtypes.Message)
+	commmiddleware.RegisterHMI(channel)
 	hmi.Channel = channel
 }
 
-func handleMessage(message commtypes.Message) commtypes.Message {
+// read contents, get user input, create new message
+func handleMessage(request commtypes.Message) commtypes.Message {
+	fmt.Println("Received message:")
+	fmt.Println(request)
 
-	return message
+	response := commtypes.Message{
+		MsgID:      request.MsgID + 1,
+		ReceiverID: request.SenderID,
+		Content:    "get user input"}
+
+	fmt.Println("Sending message:")
+	fmt.Println(response)
+	return response
 }
 
 func getUserInput() {

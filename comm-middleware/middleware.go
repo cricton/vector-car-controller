@@ -33,6 +33,11 @@ func (middleware *Middleware) RegisterChannel(channel chan commtypes.Message) in
 	return channelPos
 }
 
+// register HMI module
+func (middleware *Middleware) RegisterHMI(channel chan commtypes.Message) {
+	middleware.HMIChannel = channel
+}
+
 // SG mainloop; Waits random amount of milliseconds and sends a random message to the HMI-controller
 func (middleware Middleware) Mainloop() {
 	fmt.Println("Starting up middleware...")

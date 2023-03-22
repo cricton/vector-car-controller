@@ -3,6 +3,7 @@ package main
 import (
 	applikationssg "github.com/cricton/applikations-sg"
 	commmiddleware "github.com/cricton/comm-middleware"
+	hmisg "github.com/cricton/hmi-sg"
 )
 
 func main() {
@@ -16,13 +17,15 @@ func main() {
 	}
 
 	middleware := &commmiddleware.Middleware{CurrentMsgID: 0}
+	hmi := hmisg.HMI{}
 
 	//create channel for sg-middleware interaction
 	sg1.ControlUnit.CreateChannel(middleware)
 
-	go middleware.Mainloop()
-	sg1.Mainloop()
+	hmi.CreateChannel(middleware)
 
-	//hmi := hmisg.HMI{}
+	go middleware.Mainloop()
+	go hmi.HMI_main_loop()
+	sg1.Mainloop()
 
 }
