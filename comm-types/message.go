@@ -24,7 +24,7 @@ const (
 type RemoteProcID uint8
 
 const (
-	GetDestination    RemoteProcID = 1
-	GetUserResponse   RemoteProcID = 2
+	GetString         RemoteProcID = 1
+	GetConfirmation   RemoteProcID = 2
 	GetButtonResponse RemoteProcID = 3
 )
