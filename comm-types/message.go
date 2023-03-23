@@ -1,12 +1,14 @@
 package commtypes
 
+import graphicinterface "github.com/cricton/graphic-interface"
+
 type Message struct {
 	Type       messageType
 	MsgID      int16
 	SgID       int16
 	RpID       RemoteProcID
 	Content    string
-	ReturnCode uint8
+	ReturnCode graphicinterface.ReturnType
 }
 
 const (
@@ -24,7 +26,7 @@ const (
 type RemoteProcID uint8
 
 const (
-	GetString         RemoteProcID = 1
-	GetConfirmation   RemoteProcID = 2
-	GetButtonResponse RemoteProcID = 3
+	GetString         RemoteProcID = 0
+	GetConfirmation   RemoteProcID = 1
+	GetButtonResponse RemoteProcID = 2
 )

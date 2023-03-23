@@ -37,6 +37,7 @@ func (sg Infosg) constructRandomMessage() commtypes.Message {
 		MsgID:   sg.ControlUnit.messageID,
 		SgID:    int16(sg.ControlUnit.clientID),
 		Content: "Info",
+		RpID:    commtypes.GetConfirmation,
 	}
 
 	return message

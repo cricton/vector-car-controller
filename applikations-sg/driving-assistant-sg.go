@@ -37,6 +37,7 @@ func (sg Assistantsg) constructRandomMessage() commtypes.Message {
 		MsgID:   sg.ControlUnit.messageID,
 		SgID:    int16(sg.ControlUnit.clientID),
 		Content: "Assistant",
+		RpID:    commtypes.GetConfirmation,
 	}
 
 	return message

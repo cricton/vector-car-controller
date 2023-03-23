@@ -3,25 +3,42 @@ package graphicinterface
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 )
 
+type ReturnType uint8
+
 const (
-	ACCEPTED = 0
-	DECLINED = 1
-	INFO     = 2
+	ACCEPTED ReturnType = 0
+	DECLINED ReturnType = 1
+	INFO     ReturnType = 2
+	ERROR    ReturnType = 3
 )
 
-type ReturnType struct {
+type ReturnTuple struct {
 	Content string
-	Code    uint8
+	Code    ReturnType
 }
 
 type GUI struct {
 	MainWindow      fyne.Window
 	MasterLabel     *widget.Label
-	ResponseChannel chan ReturnType
+	ResponseChannel chan ReturnTuple
+}
+
+func (gui GUI) GetConfirmation(request string) {
+	d := dialog.NewConfirm("Please confirm!", request,
+		func(b bool) {
+			if b {
+				gui.ResponseChannel <- ReturnTuple{Content: "", Code: ACCEPTED}
+			} else {
+				gui.ResponseChannel <- ReturnTuple{Content: "", Code: DECLINED}
+			}
+		}, gui.MainWindow)
+	d.Show()
+
 }
 
 func (gui GUI) AddRequest(request string) {
@@ -29,11 +46,11 @@ func (gui GUI) AddRequest(request string) {
 }
 
 // poll until a response was given
-func (gui *GUI) AwaitResponse() ReturnType {
+func (gui *GUI) AwaitResponse() ReturnTuple {
 
-	returnType := <-gui.ResponseChannel
+	ReturnTuple := <-gui.ResponseChannel
 
-	return returnType
+	return ReturnTuple
 }
 
 func (gui *GUI) SetupGUI() {
@@ -41,14 +58,9 @@ func (gui *GUI) SetupGUI() {
 	gui.MainWindow.Resize(fyne.NewSize(1000, 600))
 	myCanvas := gui.MainWindow.Canvas()
 
-	//var buttons []widget.Button
-	/*for i := 0; i < 8; i++ {
-		append(buttons, widget.NewButton("click me"))
-	}*/
-
 	button1 := widget.NewButton("Confirm", func() {
 		if len(gui.MasterLabel.Text) > 0 {
-			gui.ResponseChannel <- ReturnType{Content: "", Code: ACCEPTED}
+			gui.ResponseChannel <- ReturnTuple{Content: "", Code: ACCEPTED}
 			gui.MasterLabel.SetText("")
 		}
 
@@ -56,7 +68,7 @@ func (gui *GUI) SetupGUI() {
 
 	button2 := widget.NewButton("Decline", func() {
 		if len(gui.MasterLabel.Text) > 0 {
-			gui.ResponseChannel <- ReturnType{Content: "", Code: DECLINED}
+			gui.ResponseChannel <- ReturnTuple{Content: "", Code: DECLINED}
 			gui.MasterLabel.SetText("")
 		}
 	})

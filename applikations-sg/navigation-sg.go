@@ -37,6 +37,7 @@ func (sg Navigationsg) constructRandomMessage() commtypes.Message {
 		MsgID:   sg.ControlUnit.messageID,
 		SgID:    int16(sg.ControlUnit.clientID),
 		Content: "Navi",
+		RpID:    commtypes.GetConfirmation,
 	}
 
 	return message

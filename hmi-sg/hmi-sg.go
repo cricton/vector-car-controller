@@ -20,7 +20,7 @@ func (hmi HMI) HMI_main_loop() {
 	application := app.New()
 	mainWindow := application.NewWindow("MHI Module")
 	hmi.GUIconnector = graphicinterface.GUI{MainWindow: mainWindow}
-	hmi.GUIconnector.ResponseChannel = make(chan graphicinterface.ReturnType)
+	hmi.GUIconnector.ResponseChannel = make(chan graphicinterface.ReturnTuple)
 	hmi.GUIconnector.SetupGUI()
 
 	//Start communication coroutine
@@ -51,10 +51,21 @@ func (hmi *HMI) RegisterHMI(commmiddleware *commmiddleware.Middleware) {
 
 // read contents, get user input, create new message
 func (hmi HMI) handleMessage(request commtypes.Message) commtypes.Message {
+	var returned graphicinterface.ReturnTuple
+	//switch depending on remote procedure ID
+	switch request.RpID {
+	case commtypes.GetButtonResponse:
 
-	hmi.GUIconnector.AddRequest(request.Content)
+	case commtypes.GetString:
 
-	returned := hmi.GUIconnector.AwaitResponse()
+	case commtypes.GetConfirmation:
+		hmi.GUIconnector.GetConfirmation(request.Content)
+
+		returned = hmi.GUIconnector.AwaitResponse()
+	default:
+		//Respond with error code in case RpID does not exist
+		returned = graphicinterface.ReturnTuple{Content: "", Code: graphicinterface.ERROR}
+	}
 
 	response := commtypes.Message{
 		Type:       commtypes.Response,
