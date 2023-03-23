@@ -1,6 +1,9 @@
 package graphicinterface
 
 import (
+	"fmt"
+	"strings"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
@@ -26,6 +29,7 @@ type GUI struct {
 	MainWindow      fyne.Window
 	MasterLabel     *widget.Label
 	ResponseChannel chan ReturnTuple
+	UserEntry       strings.Builder
 }
 
 func (gui GUI) GetConfirmation(request string) {
@@ -66,25 +70,45 @@ func (gui *GUI) SetupGUI() {
 	keyboardRow1 := container.New(layout.NewGridLayout(12))
 	keyboardRow1.Add(layout.NewSpacer())
 	for _, button := range keyboardMapping1 {
-		keyboardRow1.Add(widget.NewButton(button, func() {}))
+		letter := button
+		keyboardRow1.Add(widget.NewButton(button, func() {
+			gui.UserEntry.WriteString(letter)
+		}))
 	}
 	keyboardRow1.Add(layout.NewSpacer())
 
 	//Build second row including erase button
 	keyboardRow2 := container.New(layout.NewGridLayout(12))
 	keyboardRow2.Add(layout.NewSpacer())
-	keyboardRow2.Add(widget.NewButton("Erase", func() {}))
+	keyboardRow2.Add(widget.NewButton("Erase", func() {
+		str := gui.UserEntry.String()
+		if len(str) > 0 {
+			str = str[:len(str)-1]
+		}
+		gui.UserEntry.Reset()
+		gui.UserEntry.WriteString(str)
+	}))
 	for _, button := range keyboardMapping2 {
-		keyboardRow2.Add(widget.NewButton(button, func() {}))
+		letter := button
+		keyboardRow2.Add(widget.NewButton(button, func() { gui.UserEntry.WriteString(letter) }))
 	}
 	keyboardRow2.Add(layout.NewSpacer())
 
+	//Build third row including enter and microphone buttons
 	keyboardRow3 := container.New(layout.NewGridLayout(12))
 	keyboardRow3.Add(layout.NewSpacer())
-	keyboardRow3.Add(widget.NewButton("Enter", func() {}))
+	keyboardRow3.Add(widget.NewButton("Enter", func() {
+		userEntry := gui.UserEntry.String()
+		gui.UserEntry.Reset()
+		//gui.ResponseChannel <- ReturnTuple{Content: userEntry, Code: INFO}
+		fmt.Println(userEntry)
+
+	}))
+
 	keyboardRow3.Add(widget.NewButton("Mic", func() {}))
 	for _, button := range keyboardMapping3 {
-		keyboardRow3.Add(widget.NewButton(button, func() {}))
+		letter := button
+		keyboardRow3.Add(widget.NewButton(button, func() { gui.UserEntry.WriteString(letter) }))
 	}
 	keyboardRow3.Add(layout.NewSpacer())
 

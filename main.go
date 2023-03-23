@@ -41,10 +41,10 @@ func main() {
 
 	go middleware.Mainloop()
 
-	go sg1.Mainloop()
-	go sg2.Mainloop()
-	go sg3.Mainloop()
-	go sg4.Mainloop()
+	// go sg1.Mainloop()
+	// go sg2.Mainloop()
+	// go sg3.Mainloop()
+	// go sg4.Mainloop()
 
 	hmi.HMI_main_loop()
 
