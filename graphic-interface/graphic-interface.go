@@ -45,16 +45,16 @@ func (gui GUI) GetConfirmation(request string) {
 
 }
 
-func (gui GUI) AddRequest(request string) {
-	gui.MasterLabel.SetText(request)
-}
-
 // poll until a response was given
 func (gui *GUI) AwaitResponse() ReturnTuple {
 
 	ReturnTuple := <-gui.ResponseChannel
 
 	return ReturnTuple
+}
+
+func (gui GUI) GetString(request string) {
+	gui.MasterLabel.SetText(request)
 }
 
 func (gui *GUI) SetupGUI() {
@@ -71,8 +71,11 @@ func (gui *GUI) SetupGUI() {
 	keyboardRow1.Add(layout.NewSpacer())
 	for _, button := range keyboardMapping1 {
 		letter := button
+
 		keyboardRow1.Add(widget.NewButton(button, func() {
-			gui.UserEntry.WriteString(letter)
+			if len(gui.MasterLabel.Text) > 0 {
+				gui.UserEntry.WriteString(letter)
+			}
 		}))
 	}
 	keyboardRow1.Add(layout.NewSpacer())
@@ -90,7 +93,11 @@ func (gui *GUI) SetupGUI() {
 	}))
 	for _, button := range keyboardMapping2 {
 		letter := button
-		keyboardRow2.Add(widget.NewButton(button, func() { gui.UserEntry.WriteString(letter) }))
+		keyboardRow2.Add(widget.NewButton(button, func() {
+			if len(gui.MasterLabel.Text) > 0 {
+				gui.UserEntry.WriteString(letter)
+			}
+		}))
 	}
 	keyboardRow2.Add(layout.NewSpacer())
 
@@ -100,7 +107,8 @@ func (gui *GUI) SetupGUI() {
 	keyboardRow3.Add(widget.NewButton("Enter", func() {
 		userEntry := gui.UserEntry.String()
 		gui.UserEntry.Reset()
-		//gui.ResponseChannel <- ReturnTuple{Content: userEntry, Code: INFO}
+		gui.MasterLabel.SetText("")
+		gui.ResponseChannel <- ReturnTuple{Content: userEntry, Code: INFO}
 		fmt.Println(userEntry)
 
 	}))
@@ -108,7 +116,11 @@ func (gui *GUI) SetupGUI() {
 	keyboardRow3.Add(widget.NewButton("Mic", func() {}))
 	for _, button := range keyboardMapping3 {
 		letter := button
-		keyboardRow3.Add(widget.NewButton(button, func() { gui.UserEntry.WriteString(letter) }))
+		keyboardRow3.Add(widget.NewButton(button, func() {
+			if len(gui.MasterLabel.Text) > 0 {
+				gui.UserEntry.WriteString(letter)
+			}
+		}))
 	}
 	keyboardRow3.Add(layout.NewSpacer())
 

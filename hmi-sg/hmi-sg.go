@@ -58,7 +58,9 @@ func (hmi HMI) handleMessage(request commtypes.Message) commtypes.Message {
 	case commtypes.GetButtonResponse:
 
 	case commtypes.GetString:
+		hmi.GUIconnector.GetString(request.Content)
 
+		returned = hmi.GUIconnector.AwaitResponse()
 	case commtypes.GetConfirmation:
 		hmi.GUIconnector.GetConfirmation(request.Content)
 

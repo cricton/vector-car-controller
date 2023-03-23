@@ -37,7 +37,7 @@ func (sg Airbacksg) constructRandomMessage() commtypes.Message {
 		MsgID:   sg.ControlUnit.messageID,
 		SgID:    int16(sg.ControlUnit.clientID),
 		Content: "Idle too long. Deactivate Airbag?",
-		RpID:    commtypes.GetConfirmation,
+		RpID:    commtypes.GetString,
 	}
 
 	return message
