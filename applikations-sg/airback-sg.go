@@ -33,9 +33,10 @@ func (sg Airbacksg) Mainloop() {
 func (sg Airbacksg) constructRandomMessage() commtypes.Message {
 
 	message := commtypes.Message{
-		MsgID:    sg.ControlUnit.messageID,
-		SenderID: int16(sg.ControlUnit.clientID),
-		Content:  "test",
+		Type:    commtypes.Request,
+		MsgID:   sg.ControlUnit.messageID,
+		SgID:    int16(sg.ControlUnit.clientID),
+		Content: "test",
 	}
 
 	return message

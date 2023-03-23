@@ -33,9 +33,9 @@ func (sg Assistantsg) Mainloop() {
 func (sg Assistantsg) constructRandomMessage() commtypes.Message {
 
 	message := commtypes.Message{
-		MsgID:    sg.ControlUnit.messageID,
-		SenderID: int16(sg.ControlUnit.clientID),
-		Content:  "test2",
+		MsgID:   sg.ControlUnit.messageID,
+		SgID:    int16(sg.ControlUnit.clientID),
+		Content: "test2",
 	}
 
 	return message

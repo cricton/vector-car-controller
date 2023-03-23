@@ -37,9 +37,10 @@ func handleMessage(request commtypes.Message) commtypes.Message {
 	fmt.Println(request)
 
 	response := commtypes.Message{
-		MsgID:      request.MsgID + 1,
-		ReceiverID: request.SenderID,
-		Content:    "get user input"}
+		Type:    commtypes.Response,
+		MsgID:   request.MsgID + 1,
+		SgID:    request.SgID,
+		Content: "get user input"}
 
 	fmt.Println("Sending message:")
 	fmt.Println(response)

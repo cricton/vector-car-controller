@@ -25,12 +25,12 @@ func (middleware *Middleware) GetAndIncMsgID() int {
 	return msgID
 }
 
-func (middleware *Middleware) RegisterChannel(channel chan commtypes.Message) int {
+func (middleware *Middleware) RegisterClient(channel chan commtypes.Message) int {
 	middleware.Channels = append(middleware.Channels, channel)
 
 	//get position of channel in array to use as ID
-	channelPos := len(middleware.Channels) - 1
-	return channelPos
+	clientID := len(middleware.Channels)
+	return clientID
 }
 
 // register HMI module

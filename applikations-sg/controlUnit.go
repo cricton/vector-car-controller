@@ -28,7 +28,7 @@ func (controlUnit *ControlUnit) receiveMessage() commtypes.Message {
 // creates a new channel and adds it to the Middleware and the controlUnit
 func (controlUnit *ControlUnit) CreateChannel(commmiddleware *commmiddleware.Middleware) {
 	channel := make(chan commtypes.Message)
-	clientID := commmiddleware.RegisterChannel(channel)
+	clientID := commmiddleware.RegisterClient(channel)
 	controlUnit.clientID = int16(clientID)
 	controlUnit.Channel = channel
 }
