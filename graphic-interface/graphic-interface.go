@@ -58,35 +58,37 @@ func (gui *GUI) SetupGUI() {
 	gui.MainWindow.Resize(fyne.NewSize(1000, 600))
 	myCanvas := gui.MainWindow.Canvas()
 
-	button1 := widget.NewButton("Confirm", func() {
-		if len(gui.MasterLabel.Text) > 0 {
-			gui.ResponseChannel <- ReturnTuple{Content: "", Code: ACCEPTED}
-			gui.MasterLabel.SetText("")
-		}
-
-	})
-
-	button2 := widget.NewButton("Decline", func() {
-		if len(gui.MasterLabel.Text) > 0 {
-			gui.ResponseChannel <- ReturnTuple{Content: "", Code: DECLINED}
-			gui.MasterLabel.SetText("")
-		}
-	})
-
 	gui.MasterLabel = widget.NewLabel("")
 	gui.MasterLabel.Alignment = fyne.TextAlignCenter
 	gui.MasterLabel.TextStyle = fyne.TextStyle{Bold: true}
 
-	content := container.New(layout.NewGridLayout(5), layout.NewSpacer(), button1, layout.NewSpacer(), button2, layout.NewSpacer())
-	parentContainer := container.New(layout.NewVBoxLayout(), layout.NewSpacer(), gui.MasterLabel, layout.NewSpacer(), content, layout.NewSpacer())
-	myCanvas.SetContent(parentContainer)
+	//Build first row of keys
+	keyboardRow1 := container.New(layout.NewGridLayout(12))
+	keyboardRow1.Add(layout.NewSpacer())
+	for _, button := range keyboardMapping1 {
+		keyboardRow1.Add(widget.NewButton(button, func() {}))
+	}
+	keyboardRow1.Add(layout.NewSpacer())
 
-	//content := widget.NewButtonWithIcon("Home", theme.HomeIcon(), func() {
-	//	log.Println("tapped home")
-	//})
-	// go func() {
-	// 	time.Sleep(time.Second * 2)
-	// 	gui.MasterLabel.SetText("You good?")
-	// }()
+	//Build second row including erase button
+	keyboardRow2 := container.New(layout.NewGridLayout(12))
+	keyboardRow2.Add(layout.NewSpacer())
+	keyboardRow2.Add(widget.NewButton("Erase", func() {}))
+	for _, button := range keyboardMapping2 {
+		keyboardRow2.Add(widget.NewButton(button, func() {}))
+	}
+	keyboardRow2.Add(layout.NewSpacer())
+
+	keyboardRow3 := container.New(layout.NewGridLayout(12))
+	keyboardRow3.Add(layout.NewSpacer())
+	keyboardRow3.Add(widget.NewButton("Enter", func() {}))
+	keyboardRow3.Add(widget.NewButton("Mic", func() {}))
+	for _, button := range keyboardMapping3 {
+		keyboardRow3.Add(widget.NewButton(button, func() {}))
+	}
+	keyboardRow3.Add(layout.NewSpacer())
+
+	parentContainer := container.New(layout.NewVBoxLayout(), layout.NewSpacer(), gui.MasterLabel, layout.NewSpacer(), keyboardRow1, keyboardRow2, keyboardRow3, layout.NewSpacer())
+	myCanvas.SetContent(parentContainer)
 
 }

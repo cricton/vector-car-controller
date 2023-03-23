@@ -31,10 +31,10 @@ func (hmi HMI) HMI_main_loop() {
 
 }
 
+// reads a message from the channel, processes it and sends a response
 func (hmi HMI) HMI_comm_loop() int {
 
 	for {
-
 		msg := <-hmi.Channel
 		response := hmi.handleMessage(msg)
 		hmi.Channel <- response
@@ -52,6 +52,7 @@ func (hmi *HMI) RegisterHMI(commmiddleware *commmiddleware.Middleware) {
 // read contents, get user input, create new message
 func (hmi HMI) handleMessage(request commtypes.Message) commtypes.Message {
 	var returned graphicinterface.ReturnTuple
+
 	//switch depending on remote procedure ID
 	switch request.RpID {
 	case commtypes.GetButtonResponse:
@@ -63,10 +64,11 @@ func (hmi HMI) handleMessage(request commtypes.Message) commtypes.Message {
 
 		returned = hmi.GUIconnector.AwaitResponse()
 	default:
-		//Respond with error code in case RpID does not exist
+		//Respond with error code in case procedure ID does not exist
 		returned = graphicinterface.ReturnTuple{Content: "", Code: graphicinterface.ERROR}
 	}
 
+	//construct response message
 	response := commtypes.Message{
 		Type:       commtypes.Response,
 		MsgID:      request.MsgID + 1,
@@ -76,10 +78,3 @@ func (hmi HMI) handleMessage(request commtypes.Message) commtypes.Message {
 
 	return response
 }
-
-/*func getUserInput() {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("Enter something...")
-	text, _ := reader.ReadString('\n')
-	fmt.Println(text)
-}*/
