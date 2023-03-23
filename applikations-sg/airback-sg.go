@@ -16,7 +16,7 @@ type Airbacksg struct {
 
 // SG mainloop; Waits random amount of milliseconds and sends a random message to the HMI-controller
 func (sg Airbacksg) Mainloop() {
-	fmt.Println("Starting Airback Steuergerät")
+	fmt.Println("Starting Airback SG")
 	for {
 
 		message := sg.constructRandomMessage()
@@ -24,7 +24,7 @@ func (sg Airbacksg) Mainloop() {
 		sg.ControlUnit.sendMessage(message)
 		sg.ControlUnit.receiveMessage()
 
-		time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
+		time.Sleep(time.Duration(rand.Intn(5)+3) * time.Second)
 
 	}
 }
@@ -36,7 +36,7 @@ func (sg Airbacksg) constructRandomMessage() commtypes.Message {
 		Type:    commtypes.Request,
 		MsgID:   sg.ControlUnit.messageID,
 		SgID:    int16(sg.ControlUnit.clientID),
-		Content: "test",
+		Content: "Airbag",
 	}
 
 	return message

@@ -2,7 +2,6 @@ package commmiddleware
 
 import (
 	"fmt"
-	"time"
 
 	commtypes "github.com/cricton/comm-types"
 )
@@ -14,7 +13,6 @@ type Middleware struct {
 }
 
 func SendMessage(commtypes.Message) int {
-	fmt.Println("Sent a message")
 	return 1
 }
 
@@ -38,23 +36,36 @@ func (middleware *Middleware) RegisterHMI(channel chan commtypes.Message) {
 	middleware.HMIChannel = channel
 }
 
+func (middleware Middleware) getChannelID(message commtypes.Message) chan commtypes.Message {
+	return middleware.Channels[message.SgID-1]
+}
+
+// Blocking function. Sends message to the HMI module and awaits a response
+func (middleware Middleware) handleSGMessage(message commtypes.Message) {
+	//sends message to HMI
+	middleware.HMIChannel <- message
+
+	//waits for response of HMI
+	message = <-middleware.HMIChannel
+
+	//sends response to SG
+	channel := middleware.getChannelID(message)
+	channel <- message
+}
+
 // SG mainloop; Waits random amount of milliseconds and sends a random message to the HMI-controller
 func (middleware Middleware) Mainloop() {
 	fmt.Println("Starting up middleware...")
-	fmt.Println(middleware.Channels)
 	for {
 
-		time.Sleep(time.Millisecond)
+		//time.Sleep(time.Millisecond)
 		//check all channels for incoming messages
 
 		for _, channel := range middleware.Channels {
 			select {
 			//if a message is received it gets passed to the HMI and waits for a response
 			case message := <-channel:
-				fmt.Println("Received a message!!")
-				middleware.HMIChannel <- message
-				message = <-middleware.HMIChannel
-				channel <- message
+				middleware.handleSGMessage(message)
 			default:
 			}
 		}

@@ -25,7 +25,7 @@ func (hmi HMI) HMI_main_loop() int {
 }
 
 // creates a new channel and adds it to the Middleware and the controlUnit
-func (hmi *HMI) CreateChannel(commmiddleware *commmiddleware.Middleware) {
+func (hmi *HMI) RegisterHMI(commmiddleware *commmiddleware.Middleware) {
 	channel := make(chan commtypes.Message)
 	commmiddleware.RegisterHMI(channel)
 	hmi.Channel = channel
@@ -33,17 +33,17 @@ func (hmi *HMI) CreateChannel(commmiddleware *commmiddleware.Middleware) {
 
 // read contents, get user input, create new message
 func handleMessage(request commtypes.Message) commtypes.Message {
-	fmt.Println("Received message:")
-	fmt.Println(request)
+	//fmt.Println("Received message:")
+	//fmt.Println(request)
 
 	response := commtypes.Message{
 		Type:    commtypes.Response,
 		MsgID:   request.MsgID + 1,
 		SgID:    request.SgID,
-		Content: "get user input"}
+		Content: request.Content}
 
-	fmt.Println("Sending message:")
-	fmt.Println(response)
+	//fmt.Println("Sending message:")
+	//fmt.Println(response)
 	return response
 }
 

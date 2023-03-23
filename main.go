@@ -20,18 +20,32 @@ func main() {
 		ControlUnit: &applikationssg.ControlUnit{},
 	}
 
+	sg3 := &applikationssg.Navigationsg{
+		ControlUnit: &applikationssg.ControlUnit{},
+	}
+
+	sg4 := &applikationssg.Infosg{
+		ControlUnit: &applikationssg.ControlUnit{},
+	}
+
 	middleware := &commmiddleware.Middleware{}
 	hmi := hmisg.HMI{}
 
 	//create channel for sg-middleware interaction
-	sg1.ControlUnit.CreateChannel(middleware)
-	sg2.ControlUnit.CreateChannel(middleware)
+	sg1.ControlUnit.RegisterClient(middleware)
+	sg2.ControlUnit.RegisterClient(middleware)
+	sg3.ControlUnit.RegisterClient(middleware)
+	sg4.ControlUnit.RegisterClient(middleware)
 
-	hmi.CreateChannel(middleware)
+	hmi.RegisterHMI(middleware)
 
 	go middleware.Mainloop()
-	go hmi.HMI_main_loop()
+
 	go sg1.Mainloop()
-	sg2.Mainloop()
+	go sg2.Mainloop()
+	go sg3.Mainloop()
+	go sg4.Mainloop()
+
+	hmi.HMI_main_loop()
 
 }
