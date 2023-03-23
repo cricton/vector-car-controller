@@ -73,7 +73,7 @@ func (gui *GUI) SetupGUI() {
 		}
 	})
 
-	gui.MasterLabel = widget.NewLabel("text")
+	gui.MasterLabel = widget.NewLabel("")
 	gui.MasterLabel.Alignment = fyne.TextAlignCenter
 	gui.MasterLabel.TextStyle = fyne.TextStyle{Bold: true}
 

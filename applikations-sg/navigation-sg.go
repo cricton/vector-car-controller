@@ -36,7 +36,7 @@ func (sg Navigationsg) constructRandomMessage() commtypes.Message {
 		Type:    commtypes.Request,
 		MsgID:   sg.ControlUnit.messageID,
 		SgID:    int16(sg.ControlUnit.clientID),
-		Content: "Navi",
+		Content: "You seem to be lost. Start navigation?",
 		RpID:    commtypes.GetConfirmation,
 	}
 

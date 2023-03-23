@@ -36,7 +36,7 @@ func (sg Assistantsg) constructRandomMessage() commtypes.Message {
 		Type:    commtypes.Request,
 		MsgID:   sg.ControlUnit.messageID,
 		SgID:    int16(sg.ControlUnit.clientID),
-		Content: "Assistant",
+		Content: "Activate cruise control?",
 		RpID:    commtypes.GetConfirmation,
 	}
 
