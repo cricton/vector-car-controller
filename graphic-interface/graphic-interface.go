@@ -47,11 +47,18 @@ func (gui *GUI) SetupGUI() {
 	}*/
 
 	button1 := widget.NewButton("Confirm", func() {
-		gui.ResponseChannel <- ReturnType{Content: "", Code: ACCEPTED}
+		if len(gui.MasterLabel.Text) > 0 {
+			gui.ResponseChannel <- ReturnType{Content: "", Code: ACCEPTED}
+			gui.MasterLabel.SetText("")
+		}
+
 	})
 
 	button2 := widget.NewButton("Decline", func() {
-		gui.ResponseChannel <- ReturnType{Content: "", Code: DECLINED}
+		if len(gui.MasterLabel.Text) > 0 {
+			gui.ResponseChannel <- ReturnType{Content: "", Code: DECLINED}
+			gui.MasterLabel.SetText("")
+		}
 	})
 
 	gui.MasterLabel = widget.NewLabel("text")
