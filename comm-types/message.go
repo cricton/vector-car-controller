@@ -6,7 +6,7 @@ type Message struct {
 	SgID       int16
 	RpID       RemoteProcID
 	Content    string
-	ReturnCode uint16
+	ReturnCode uint8
 }
 
 const (

@@ -1,9 +1,7 @@
 package hmisg
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 
 	"fyne.io/fyne/v2/app"
 	commmiddleware "github.com/cricton/comm-middleware"
@@ -19,14 +17,16 @@ type HMI struct {
 func (hmi HMI) HMI_main_loop() {
 	fmt.Println("Starting HMI module...")
 
+	application := app.New()
+	mainWindow := application.NewWindow("MHI Module")
+	hmi.GUIconnector = graphicinterface.GUI{MainWindow: mainWindow}
+	hmi.GUIconnector.ResponseChannel = make(chan graphicinterface.ReturnType)
+	hmi.GUIconnector.SetupGUI()
+
 	//Start communication coroutine
 	go hmi.HMI_comm_loop()
 
-	application := app.New()
-	mainWindow := application.NewWindow("MHI Module")
-	gui := graphicinterface.GUI{MainWindow: mainWindow}
-	gui.SetupGUI()
-
+	//Start GUI loop
 	mainWindow.ShowAndRun()
 
 }
@@ -36,7 +36,7 @@ func (hmi HMI) HMI_comm_loop() int {
 	for {
 
 		msg := <-hmi.Channel
-		response := handleMessage(msg)
+		response := hmi.handleMessage(msg)
 		hmi.Channel <- response
 	}
 
@@ -50,24 +50,25 @@ func (hmi *HMI) RegisterHMI(commmiddleware *commmiddleware.Middleware) {
 }
 
 // read contents, get user input, create new message
-func handleMessage(request commtypes.Message) commtypes.Message {
-	//fmt.Println("Received message:")
-	//fmt.Println(request)
+func (hmi HMI) handleMessage(request commtypes.Message) commtypes.Message {
+
+	hmi.GUIconnector.AddRequest(request.Content)
+
+	returned := hmi.GUIconnector.AwaitResponse()
 
 	response := commtypes.Message{
-		Type:    commtypes.Response,
-		MsgID:   request.MsgID + 1,
-		SgID:    request.SgID,
-		Content: request.Content}
+		Type:       commtypes.Response,
+		MsgID:      request.MsgID + 1,
+		SgID:       request.SgID,
+		Content:    returned.Content,
+		ReturnCode: returned.Code}
 
-	//fmt.Println("Sending message:")
-	//fmt.Println(response)
 	return response
 }
 
-func getUserInput() {
+/*func getUserInput() {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Enter something...")
 	text, _ := reader.ReadString('\n')
 	fmt.Println(text)
-}
+}*/
