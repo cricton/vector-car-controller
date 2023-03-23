@@ -5,16 +5,34 @@ import (
 	"fmt"
 	"os"
 
+	"fyne.io/fyne/v2/app"
 	commmiddleware "github.com/cricton/comm-middleware"
 	commtypes "github.com/cricton/comm-types"
+	graphicinterface "github.com/cricton/graphic-interface"
 )
 
 type HMI struct {
-	Channel chan commtypes.Message
+	Channel      chan commtypes.Message
+	GUIconnector graphicinterface.GUI
 }
 
-func (hmi HMI) HMI_main_loop() int {
+func (hmi HMI) HMI_main_loop() {
 	fmt.Println("Starting HMI module...")
+
+	//Start communication coroutine
+	go hmi.HMI_comm_loop()
+
+	application := app.New()
+	mainWindow := application.NewWindow("MHI Module")
+	gui := graphicinterface.GUI{MainWindow: mainWindow}
+	gui.SetupGUI()
+
+	mainWindow.ShowAndRun()
+
+}
+
+func (hmi HMI) HMI_comm_loop() int {
+
 	for {
 
 		msg := <-hmi.Channel
