@@ -27,7 +27,7 @@ type ReturnTuple struct {
 
 type GUI struct {
 	MainWindow      fyne.Window
-	MasterLabel     *widget.Label
+	RequestLabel    *widget.Label
 	ResponseChannel chan ReturnTuple
 	UserEntry       strings.Builder
 }
@@ -54,7 +54,7 @@ func (gui *GUI) AwaitResponse() ReturnTuple {
 }
 
 func (gui GUI) GetString(request string) {
-	gui.MasterLabel.SetText(request)
+	gui.RequestLabel.SetText(request)
 }
 
 func (gui *GUI) SetupGUI() {
@@ -62,9 +62,15 @@ func (gui *GUI) SetupGUI() {
 	gui.MainWindow.Resize(fyne.NewSize(1000, 600))
 	myCanvas := gui.MainWindow.Canvas()
 
-	gui.MasterLabel = widget.NewLabel("")
-	gui.MasterLabel.Alignment = fyne.TextAlignCenter
-	gui.MasterLabel.TextStyle = fyne.TextStyle{Bold: true}
+	//Label for requests
+	gui.RequestLabel = widget.NewLabel("")
+	gui.RequestLabel.Alignment = fyne.TextAlignCenter
+	gui.RequestLabel.TextStyle = fyne.TextStyle{Bold: true}
+
+	//Label for keyboard input
+	inputLabel := widget.NewLabel("")
+
+	inputLabelLayout := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), inputLabel, layout.NewSpacer())
 
 	//Build first row of keys
 	keyboardRow1 := container.New(layout.NewGridLayout(12))
@@ -73,8 +79,9 @@ func (gui *GUI) SetupGUI() {
 		letter := button
 
 		keyboardRow1.Add(widget.NewButton(button, func() {
-			if len(gui.MasterLabel.Text) > 0 {
+			if len(gui.RequestLabel.Text) > 0 {
 				gui.UserEntry.WriteString(letter)
+				inputLabel.SetText(gui.UserEntry.String())
 			}
 		}))
 	}
@@ -90,12 +97,14 @@ func (gui *GUI) SetupGUI() {
 		}
 		gui.UserEntry.Reset()
 		gui.UserEntry.WriteString(str)
+		inputLabel.SetText(gui.UserEntry.String())
 	}))
 	for _, button := range keyboardMapping2 {
 		letter := button
 		keyboardRow2.Add(widget.NewButton(button, func() {
-			if len(gui.MasterLabel.Text) > 0 {
+			if len(gui.RequestLabel.Text) > 0 {
 				gui.UserEntry.WriteString(letter)
+				inputLabel.SetText(gui.UserEntry.String())
 			}
 		}))
 	}
@@ -107,9 +116,10 @@ func (gui *GUI) SetupGUI() {
 	keyboardRow3.Add(widget.NewButton("Enter", func() {
 		userEntry := gui.UserEntry.String()
 		gui.UserEntry.Reset()
-		gui.MasterLabel.SetText("")
+		gui.RequestLabel.SetText("")
 		gui.ResponseChannel <- ReturnTuple{Content: userEntry, Code: INFO}
 		fmt.Println(userEntry)
+		inputLabel.SetText(gui.UserEntry.String())
 
 	}))
 
@@ -117,14 +127,15 @@ func (gui *GUI) SetupGUI() {
 	for _, button := range keyboardMapping3 {
 		letter := button
 		keyboardRow3.Add(widget.NewButton(button, func() {
-			if len(gui.MasterLabel.Text) > 0 {
+			if len(gui.RequestLabel.Text) > 0 {
 				gui.UserEntry.WriteString(letter)
+				inputLabel.SetText(gui.UserEntry.String())
 			}
 		}))
 	}
 	keyboardRow3.Add(layout.NewSpacer())
 
-	parentContainer := container.New(layout.NewVBoxLayout(), layout.NewSpacer(), gui.MasterLabel, layout.NewSpacer(), keyboardRow1, keyboardRow2, keyboardRow3, layout.NewSpacer())
+	parentContainer := container.New(layout.NewVBoxLayout(), layout.NewSpacer(), gui.RequestLabel, inputLabelLayout, layout.NewSpacer(), keyboardRow1, keyboardRow2, keyboardRow3, layout.NewSpacer())
 	myCanvas.SetContent(parentContainer)
 
 }
