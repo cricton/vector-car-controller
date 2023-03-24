@@ -55,7 +55,8 @@ func (hmi HMI) handleMessage(request commtypes.Message) commtypes.Message {
 
 	//switch depending on remote procedure ID
 	switch request.RpID {
-	case commtypes.GetButtonResponse:
+	case commtypes.Info:
+		returned = hmi.GUIconnector.ShowInfo(request.Content)
 
 	case commtypes.GetString:
 		hmi.GUIconnector.GetString(request.Content)

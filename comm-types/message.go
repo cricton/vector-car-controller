@@ -3,30 +3,30 @@ package commtypes
 import graphicinterface "github.com/cricton/graphic-interface"
 
 type Message struct {
-	Type       messageType
-	MsgID      int16
-	SgID       int16
+	Type       MessageType
+	SgID       uint8
+	MsgID      uint16
 	RpID       RemoteProcID
-	Content    string
 	ReturnCode graphicinterface.ReturnType
+	Content    string
 }
 
 const (
 	MHIID = 0
 )
 
-type messageType uint8
+type MessageType uint8
 
 const (
-	Request  messageType = 0
-	Response messageType = 1
+	Request  MessageType = 0
+	Response MessageType = 1
 )
 
 // Remote Procedure ID
 type RemoteProcID uint8
 
 const (
-	GetString         RemoteProcID = 0
-	GetConfirmation   RemoteProcID = 1
-	GetButtonResponse RemoteProcID = 2
+	GetString       RemoteProcID = 0
+	GetConfirmation RemoteProcID = 1
+	Info            RemoteProcID = 2
 )

@@ -35,7 +35,7 @@ func (sg Infosg) constructRandomMessage() commtypes.Message {
 	message := commtypes.Message{
 		Type:    commtypes.Request,
 		MsgID:   sg.ControlUnit.messageID,
-		SgID:    int16(sg.ControlUnit.clientID),
+		SgID:    sg.ControlUnit.clientID,
 		Content: "Volume too loud. Turn down radio?",
 		RpID:    commtypes.GetConfirmation,
 	}

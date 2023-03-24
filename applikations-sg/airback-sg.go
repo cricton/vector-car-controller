@@ -29,16 +29,16 @@ func (sg Airbacksg) Mainloop() {
 	}
 }
 
-// TODO proper message ID
 func (sg Airbacksg) constructRandomMessage() commtypes.Message {
 
 	message := commtypes.Message{
-		Type:    commtypes.Request,
-		MsgID:   sg.ControlUnit.messageID,
-		SgID:    int16(sg.ControlUnit.clientID),
-		Content: "Idle too long. Deactivate Airbag?",
-		RpID:    commtypes.GetString,
+		Type:  commtypes.Request,
+		MsgID: sg.ControlUnit.messageID,
+		SgID:  sg.ControlUnit.clientID,
 	}
+
+	message.RpID = commtypes.Info
+	message.Content = "Idle too long. Deactivate Airbag?"
 
 	return message
 }

@@ -45,6 +45,13 @@ func (gui GUI) GetConfirmation(request string) {
 
 }
 
+func (gui GUI) ShowInfo(request string) ReturnTuple {
+	d := dialog.NewInformation("Info!", request, gui.MainWindow)
+	d.Show()
+
+	return ReturnTuple{Content: "", Code: INFO}
+}
+
 // poll until a response was given
 func (gui *GUI) AwaitResponse() ReturnTuple {
 
@@ -69,7 +76,7 @@ func (gui *GUI) SetupGUI() {
 
 	//Label for keyboard input
 	inputLabel := widget.NewLabel("")
-
+	inputLabel.Resize(fyne.NewSize(300, 100))
 	inputLabelLayout := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), inputLabel, layout.NewSpacer())
 
 	//Build first row of keys
@@ -135,7 +142,9 @@ func (gui *GUI) SetupGUI() {
 	}
 	keyboardRow3.Add(layout.NewSpacer())
 
+	sep := widget.NewSeparator()
 	parentContainer := container.New(layout.NewVBoxLayout(), layout.NewSpacer(), gui.RequestLabel, inputLabelLayout, layout.NewSpacer(), keyboardRow1, keyboardRow2, keyboardRow3, layout.NewSpacer())
 	myCanvas.SetContent(parentContainer)
+	sep.Show()
 
 }

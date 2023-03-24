@@ -9,8 +9,8 @@ import (
 
 type ControlUnit struct {
 	Channel   chan commtypes.Message
-	clientID  int16
-	messageID int16
+	clientID  uint8
+	messageID uint16
 }
 
 func (controlUnit ControlUnit) sendMessage(message commtypes.Message) {
@@ -23,7 +23,7 @@ func (controlUnit *ControlUnit) receiveMessage() commtypes.Message {
 	message := <-controlUnit.Channel
 	fmt.Println("Received message: ", controlUnit.clientID, message)
 
-	controlUnit.messageID = int16(message.MsgID) + 1
+	controlUnit.messageID = uint16(message.MsgID) + 1
 	return message
 }
 
@@ -31,6 +31,6 @@ func (controlUnit *ControlUnit) receiveMessage() commtypes.Message {
 func (controlUnit *ControlUnit) RegisterClient(commmiddleware *commmiddleware.Middleware) {
 	channel := make(chan commtypes.Message)
 	clientID := commmiddleware.RegisterClient(channel)
-	controlUnit.clientID = int16(clientID)
+	controlUnit.clientID = uint8(clientID)
 	controlUnit.Channel = channel
 }
