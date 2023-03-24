@@ -13,15 +13,24 @@ type ControlUnit struct {
 	messageID uint16
 }
 
-func (controlUnit ControlUnit) sendMessage(message commtypes.Message) {
-	fmt.Println("Sending mesage: ", message)
+func (controlUnit ControlUnit) sendMessage(request commtypes.RequestMsg) {
+	message := commtypes.Message{
+		Type:  commtypes.Request,
+		MsgID: controlUnit.messageID,
+		SgID:  controlUnit.clientID,
+	}
+
+	message.RpID = request.RpID
+	message.Content = request.Content
+
+	fmt.Printf("Sending mesage: %#v\n", message)
 	controlUnit.Channel <- message
 }
 
 func (controlUnit *ControlUnit) receiveMessage() commtypes.Message {
 
 	message := <-controlUnit.Channel
-	fmt.Println("Received message: ", controlUnit.clientID, message)
+	fmt.Printf("Received message: %#v\n", message)
 
 	controlUnit.messageID = uint16(message.MsgID) + 1
 	return message

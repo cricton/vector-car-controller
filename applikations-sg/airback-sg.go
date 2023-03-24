@@ -19,9 +19,9 @@ func (sg Airbacksg) Mainloop() {
 	fmt.Println("Starting Airback SG")
 	for {
 
-		message := sg.constructRandomMessage()
+		request := sg.constructRandomRequest()
 
-		sg.ControlUnit.sendMessage(message)
+		sg.ControlUnit.sendMessage(request)
 		sg.ControlUnit.receiveMessage()
 
 		time.Sleep(time.Duration(rand.Intn(5)+3) * time.Second)
@@ -29,16 +29,21 @@ func (sg Airbacksg) Mainloop() {
 	}
 }
 
-func (sg Airbacksg) constructRandomMessage() commtypes.Message {
+func (sg Airbacksg) constructRandomRequest() commtypes.RequestMsg {
 
-	message := commtypes.Message{
-		Type:  commtypes.Request,
-		MsgID: sg.ControlUnit.messageID,
-		SgID:  sg.ControlUnit.clientID,
+	request := commtypes.RequestMsg{
+		RpID:    commtypes.ProcIDs[rand.Intn(3)],
+		Content: "Idle too long. Deactivate Airbag?",
 	}
 
-	message.RpID = commtypes.Info
-	message.Content = "Idle too long. Deactivate Airbag?"
+	return request
+}
 
-	return message
+func (sg Airbacksg) SendMessage(request commtypes.RequestMsg) {
+	sg.ControlUnit.sendMessage(request)
+}
+
+func (sg Airbacksg) ReceiveMessage() commtypes.Message {
+
+	return sg.ControlUnit.receiveMessage()
 }

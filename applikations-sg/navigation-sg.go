@@ -19,9 +19,9 @@ func (sg Navigationsg) Mainloop() {
 	fmt.Println("Starting Driving Assistant SG")
 	for {
 
-		message := sg.constructRandomMessage()
+		request := sg.constructRandomMessage()
 
-		sg.ControlUnit.sendMessage(message)
+		sg.ControlUnit.sendMessage(request)
 		sg.ControlUnit.receiveMessage()
 
 		time.Sleep(time.Duration(rand.Intn(5)+3) * time.Second)
@@ -30,15 +30,12 @@ func (sg Navigationsg) Mainloop() {
 }
 
 // TODO proper message ID
-func (sg Navigationsg) constructRandomMessage() commtypes.Message {
+func (sg Navigationsg) constructRandomMessage() commtypes.RequestMsg {
 
-	message := commtypes.Message{
-		Type:    commtypes.Request,
-		MsgID:   sg.ControlUnit.messageID,
-		SgID:    sg.ControlUnit.clientID,
+	request := commtypes.RequestMsg{
 		Content: "You seem to be lost. Start navigation?",
 		RpID:    commtypes.GetConfirmation,
 	}
 
-	return message
+	return request
 }

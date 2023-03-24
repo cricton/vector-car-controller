@@ -19,9 +19,9 @@ func (sg Assistantsg) Mainloop() {
 	fmt.Println("Starting Driving Assistant SG")
 	for {
 
-		message := sg.constructRandomMessage()
+		request := sg.constructRandomRequest()
 
-		sg.ControlUnit.sendMessage(message)
+		sg.ControlUnit.sendMessage(request)
 		sg.ControlUnit.receiveMessage()
 
 		time.Sleep(time.Duration(rand.Intn(5)+3) * time.Second)
@@ -30,15 +30,13 @@ func (sg Assistantsg) Mainloop() {
 }
 
 // TODO proper message ID
-func (sg Assistantsg) constructRandomMessage() commtypes.Message {
+func (sg Assistantsg) constructRandomRequest() commtypes.RequestMsg {
 
-	message := commtypes.Message{
-		Type:    commtypes.Request,
-		MsgID:   sg.ControlUnit.messageID,
-		SgID:    sg.ControlUnit.clientID,
+	request := commtypes.RequestMsg{
+
 		Content: "Activate cruise control?",
 		RpID:    commtypes.GetConfirmation,
 	}
 
-	return message
+	return request
 }
