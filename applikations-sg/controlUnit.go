@@ -43,3 +43,7 @@ func (controlUnit *ControlUnit) RegisterClient(commmiddleware *commmiddleware.Mi
 	controlUnit.clientID = uint8(clientID)
 	controlUnit.Channel = channel
 }
+
+func (controlUnit ControlUnit) GetClientID() uint8 {
+	return controlUnit.clientID
+}

@@ -32,7 +32,7 @@ func (sg Airbacksg) Mainloop() {
 func (sg Airbacksg) constructRandomRequest() commtypes.RequestMsg {
 
 	request := commtypes.RequestMsg{
-		RpID:    commtypes.ProcIDs[rand.Intn(3)],
+		RpID:    commtypes.ProcIDs[rand.Intn(4)+1],
 		Content: "Idle too long. Deactivate Airbag?",
 	}
 

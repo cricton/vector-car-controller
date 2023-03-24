@@ -31,13 +31,27 @@ func (hmi HMI) HMI_main_loop() {
 
 }
 
+// Waits for a message to arrive from the middleware
+func (hmi HMI) ReceiveMessage() commtypes.Message {
+
+	message := <-hmi.Channel
+	return message
+}
+
+// reads a message from the channel, processes it and sends a response
+func (hmi HMI) SendMessage(message commtypes.Message) {
+
+	response := hmi.handleMessage(message)
+	hmi.Channel <- response
+
+}
+
 // reads a message from the channel, processes it and sends a response
 func (hmi HMI) HMI_comm_loop() int {
 
 	for {
-		msg := <-hmi.Channel
-		response := hmi.handleMessage(msg)
-		hmi.Channel <- response
+		message := hmi.ReceiveMessage()
+		hmi.SendMessage(message)
 	}
 
 }
@@ -56,16 +70,17 @@ func (hmi HMI) handleMessage(request commtypes.Message) commtypes.Message {
 	//switch depending on remote procedure ID
 	switch request.RpID {
 	case commtypes.Info:
-		returned = hmi.GUIconnector.ShowInfo(request.Content)
+		hmi.GUIconnector.ShowInfo(request.Content)
+		returned = hmi.GUIconnector.AwaitResponse()
 
 	case commtypes.GetString:
 		hmi.GUIconnector.GetString(request.Content)
-
 		returned = hmi.GUIconnector.AwaitResponse()
+
 	case commtypes.GetConfirmation:
 		hmi.GUIconnector.GetConfirmation(request.Content)
-
 		returned = hmi.GUIconnector.AwaitResponse()
+
 	default:
 		//Respond with error code in case procedure ID does not exist
 		returned = graphicinterface.ReturnTuple{Content: "", Code: graphicinterface.ERROR}

@@ -2,28 +2,16 @@ package graphicinterface
 
 import (
 	"fmt"
+	"image/color"
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 )
-
-type ReturnType uint8
-
-const (
-	ACCEPTED ReturnType = 0
-	DECLINED ReturnType = 1
-	INFO     ReturnType = 2
-	ERROR    ReturnType = 3
-)
-
-type ReturnTuple struct {
-	Content string
-	Code    ReturnType
-}
 
 type GUI struct {
 	MainWindow      fyne.Window
@@ -45,11 +33,13 @@ func (gui GUI) GetConfirmation(request string) {
 
 }
 
-func (gui GUI) ShowInfo(request string) ReturnTuple {
+func (gui GUI) ShowInfo(request string) {
 	d := dialog.NewInformation("Info!", request, gui.MainWindow)
+	d.SetOnClosed(func() {
+		gui.ResponseChannel <- ReturnTuple{Content: "", Code: INFO}
+	})
 	d.Show()
 
-	return ReturnTuple{Content: "", Code: INFO}
 }
 
 // poll until a response was given
@@ -66,7 +56,7 @@ func (gui GUI) GetString(request string) {
 
 func (gui *GUI) SetupGUI() {
 
-	gui.MainWindow.Resize(fyne.NewSize(1000, 600))
+	gui.MainWindow.Resize(fyne.NewSize(800, 400))
 	myCanvas := gui.MainWindow.Canvas()
 
 	//Label for requests
@@ -106,6 +96,7 @@ func (gui *GUI) SetupGUI() {
 		gui.UserEntry.WriteString(str)
 		inputLabel.SetText(gui.UserEntry.String())
 	}))
+
 	for _, button := range keyboardMapping2 {
 		letter := button
 		keyboardRow2.Add(widget.NewButton(button, func() {
@@ -124,7 +115,7 @@ func (gui *GUI) SetupGUI() {
 		userEntry := gui.UserEntry.String()
 		gui.UserEntry.Reset()
 		gui.RequestLabel.SetText("")
-		gui.ResponseChannel <- ReturnTuple{Content: userEntry, Code: INFO}
+		gui.ResponseChannel <- ReturnTuple{Content: userEntry, Code: STRING}
 		fmt.Println(userEntry)
 		inputLabel.SetText(gui.UserEntry.String())
 
@@ -142,9 +133,24 @@ func (gui *GUI) SetupGUI() {
 	}
 	keyboardRow3.Add(layout.NewSpacer())
 
-	sep := widget.NewSeparator()
-	parentContainer := container.New(layout.NewVBoxLayout(), layout.NewSpacer(), gui.RequestLabel, inputLabelLayout, layout.NewSpacer(), keyboardRow1, keyboardRow2, keyboardRow3, layout.NewSpacer())
+	//Add horizontal dividers
+	rect1 := canvas.NewRectangle(color.White)
+	rect1.SetMinSize(fyne.NewSize(2, 2))
+	rect2 := canvas.NewRectangle(color.White)
+	rect2.SetMinSize(fyne.NewSize(2, 2))
+
+	parentContainer := container.New(layout.NewVBoxLayout(),
+		layout.NewSpacer(),
+		rect1,
+		gui.RequestLabel,
+		inputLabelLayout,
+		rect2,
+		layout.NewSpacer(),
+		keyboardRow1,
+		keyboardRow2,
+		keyboardRow3,
+		layout.NewSpacer())
+
 	myCanvas.SetContent(parentContainer)
-	sep.Show()
 
 }
