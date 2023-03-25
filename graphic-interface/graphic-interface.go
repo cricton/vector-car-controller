@@ -18,9 +18,12 @@ type GUI struct {
 	RequestLabel    *widget.Label
 	ResponseChannel chan ReturnTuple
 	UserEntry       strings.Builder
+	//--------for testing--------//
+	inputLabel  *widget.Label
+	enterButton *widget.Button
 }
 
-func (gui GUI) GetConfirmation(request string) {
+func (gui GUI) GetConfirmation(request string) dialog.Dialog {
 	d := dialog.NewConfirm("Please confirm!", request,
 		func(b bool) {
 			if b {
@@ -31,15 +34,17 @@ func (gui GUI) GetConfirmation(request string) {
 		}, gui.MainWindow)
 	d.Show()
 
+	return d
 }
 
-func (gui GUI) ShowInfo(request string) {
+func (gui GUI) ShowInfo(request string) dialog.Dialog {
 	d := dialog.NewInformation("Info!", request, gui.MainWindow)
 	d.SetOnClosed(func() {
 		gui.ResponseChannel <- ReturnTuple{Content: "", Code: INFO}
 	})
 	d.Show()
 
+	return d
 }
 
 // poll until a response was given
@@ -54,6 +59,74 @@ func (gui GUI) GetString(request string) {
 	gui.RequestLabel.SetText(request)
 }
 
+func (gui *GUI) makeKeyboardRows() (*fyne.Container, *fyne.Container, *fyne.Container) {
+	// Build first row of keys
+	keyboardRow1 := container.New(layout.NewGridLayout(12))
+	keyboardRow1.Add(layout.NewSpacer())
+	for _, button := range keyboardMapping1 {
+		letter := button
+
+		keyboardRow1.Add(widget.NewButton(button, func() {
+			if len(gui.RequestLabel.Text) > 0 {
+				gui.UserEntry.WriteString(letter)
+				gui.inputLabel.SetText(gui.UserEntry.String())
+			}
+		}))
+	}
+	keyboardRow1.Add(layout.NewSpacer())
+
+	// Build second row including erase button
+	keyboardRow2 := container.New(layout.NewGridLayout(12))
+	keyboardRow2.Add(layout.NewSpacer())
+	keyboardRow2.Add(widget.NewButton("Erase", func() {
+		str := gui.UserEntry.String()
+		if len(str) > 0 {
+			str = str[:len(str)-1]
+		}
+		gui.UserEntry.Reset()
+		gui.UserEntry.WriteString(str)
+		gui.inputLabel.SetText(gui.UserEntry.String())
+	}))
+
+	for _, button := range keyboardMapping2 {
+		letter := button
+		keyboardRow2.Add(widget.NewButton(button, func() {
+			if len(gui.RequestLabel.Text) > 0 {
+				gui.UserEntry.WriteString(letter)
+				gui.inputLabel.SetText(gui.UserEntry.String())
+			}
+		}))
+	}
+	keyboardRow2.Add(layout.NewSpacer())
+
+	// Build third row including enter and microphone buttons
+	keyboardRow3 := container.New(layout.NewGridLayout(12))
+	keyboardRow3.Add(layout.NewSpacer())
+	gui.enterButton = widget.NewButton("Enter", func() {
+		userEntry := gui.UserEntry.String()
+		gui.UserEntry.Reset()
+		gui.RequestLabel.SetText("")
+		gui.ResponseChannel <- ReturnTuple{Content: userEntry, Code: STRING}
+		fmt.Println(userEntry)
+		gui.inputLabel.SetText(gui.UserEntry.String())
+
+	})
+	keyboardRow3.Add(gui.enterButton)
+
+	keyboardRow3.Add(widget.NewButton("Mic", func() {}))
+	for _, button := range keyboardMapping3 {
+		letter := button
+		keyboardRow3.Add(widget.NewButton(button, func() {
+			if len(gui.RequestLabel.Text) > 0 {
+				gui.UserEntry.WriteString(letter)
+				gui.inputLabel.SetText(gui.UserEntry.String())
+			}
+		}))
+	}
+	keyboardRow3.Add(layout.NewSpacer())
+
+	return keyboardRow1, keyboardRow2, keyboardRow3
+}
 func (gui *GUI) SetupGUI() {
 
 	gui.MainWindow.Resize(fyne.NewSize(800, 400))
@@ -65,73 +138,9 @@ func (gui *GUI) SetupGUI() {
 	gui.RequestLabel.TextStyle = fyne.TextStyle{Bold: true}
 
 	//Label for keyboard input
-	inputLabel := widget.NewLabel("")
-	inputLabel.Resize(fyne.NewSize(300, 100))
-	inputLabelLayout := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), inputLabel, layout.NewSpacer())
-
-	//Build first row of keys
-	keyboardRow1 := container.New(layout.NewGridLayout(12))
-	keyboardRow1.Add(layout.NewSpacer())
-	for _, button := range keyboardMapping1 {
-		letter := button
-
-		keyboardRow1.Add(widget.NewButton(button, func() {
-			if len(gui.RequestLabel.Text) > 0 {
-				gui.UserEntry.WriteString(letter)
-				inputLabel.SetText(gui.UserEntry.String())
-			}
-		}))
-	}
-	keyboardRow1.Add(layout.NewSpacer())
-
-	//Build second row including erase button
-	keyboardRow2 := container.New(layout.NewGridLayout(12))
-	keyboardRow2.Add(layout.NewSpacer())
-	keyboardRow2.Add(widget.NewButton("Erase", func() {
-		str := gui.UserEntry.String()
-		if len(str) > 0 {
-			str = str[:len(str)-1]
-		}
-		gui.UserEntry.Reset()
-		gui.UserEntry.WriteString(str)
-		inputLabel.SetText(gui.UserEntry.String())
-	}))
-
-	for _, button := range keyboardMapping2 {
-		letter := button
-		keyboardRow2.Add(widget.NewButton(button, func() {
-			if len(gui.RequestLabel.Text) > 0 {
-				gui.UserEntry.WriteString(letter)
-				inputLabel.SetText(gui.UserEntry.String())
-			}
-		}))
-	}
-	keyboardRow2.Add(layout.NewSpacer())
-
-	//Build third row including enter and microphone buttons
-	keyboardRow3 := container.New(layout.NewGridLayout(12))
-	keyboardRow3.Add(layout.NewSpacer())
-	keyboardRow3.Add(widget.NewButton("Enter", func() {
-		userEntry := gui.UserEntry.String()
-		gui.UserEntry.Reset()
-		gui.RequestLabel.SetText("")
-		gui.ResponseChannel <- ReturnTuple{Content: userEntry, Code: STRING}
-		fmt.Println(userEntry)
-		inputLabel.SetText(gui.UserEntry.String())
-
-	}))
-
-	keyboardRow3.Add(widget.NewButton("Mic", func() {}))
-	for _, button := range keyboardMapping3 {
-		letter := button
-		keyboardRow3.Add(widget.NewButton(button, func() {
-			if len(gui.RequestLabel.Text) > 0 {
-				gui.UserEntry.WriteString(letter)
-				inputLabel.SetText(gui.UserEntry.String())
-			}
-		}))
-	}
-	keyboardRow3.Add(layout.NewSpacer())
+	gui.inputLabel = widget.NewLabel("")
+	gui.inputLabel.Resize(fyne.NewSize(300, 100))
+	inputLabelLayout := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), gui.inputLabel, layout.NewSpacer())
 
 	//Add horizontal dividers
 	rect1 := canvas.NewRectangle(color.White)
@@ -139,18 +148,24 @@ func (gui *GUI) SetupGUI() {
 	rect2 := canvas.NewRectangle(color.White)
 	rect2.SetMinSize(fyne.NewSize(2, 2))
 
-	parentContainer := container.New(layout.NewVBoxLayout(),
+	parentContainer := container.NewVBox(
 		layout.NewSpacer(),
 		rect1,
 		gui.RequestLabel,
 		inputLabelLayout,
 		rect2,
 		layout.NewSpacer(),
-		keyboardRow1,
-		keyboardRow2,
-		keyboardRow3,
+		container.NewVBox(gui.makeKeyboardRows()),
 		layout.NewSpacer())
 
 	myCanvas.SetContent(parentContainer)
 
+}
+
+func (gui GUI) GetInputLabel() *widget.Label {
+	return gui.inputLabel
+}
+
+func (gui GUI) GetEnterButton() *widget.Button {
+	return gui.enterButton
 }

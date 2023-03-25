@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	commmiddleware "github.com/cricton/comm-middleware"
 	commtypes "github.com/cricton/comm-types"
@@ -18,14 +19,20 @@ type HMI struct {
 	GUIconnector graphicinterface.GUI
 }
 
-func (hmi HMI) HMI_main_loop() {
-	fmt.Println("Starting HMI module...")
-
+func (hmi *HMI) PrepareGUI() fyne.Window {
 	application := app.New()
 	mainWindow := application.NewWindow("MHI Module")
 	hmi.GUIconnector = graphicinterface.GUI{MainWindow: mainWindow}
 	hmi.GUIconnector.ResponseChannel = make(chan graphicinterface.ReturnTuple)
 	hmi.GUIconnector.SetupGUI()
+
+	return mainWindow
+}
+
+func (hmi HMI) HMI_main_loop() {
+	fmt.Println("Starting HMI module...")
+
+	mainWindow := hmi.PrepareGUI()
 
 	//Start communication coroutine
 	go hmi.HMI_comm_loop()
@@ -62,7 +69,6 @@ func (hmi HMI) HMI_comm_loop() int {
 
 		hmi.SendResponse(message, hmi.SGAddresses[message.SgID])
 	}
-
 }
 
 // read contents, get user input, create new message
