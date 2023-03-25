@@ -3,7 +3,6 @@ package applikationssg
 import (
 	"fmt"
 
-	commmiddleware "github.com/cricton/comm-middleware"
 	commtypes "github.com/cricton/comm-types"
 )
 
@@ -13,7 +12,7 @@ type ControlUnit struct {
 	messageID uint16
 }
 
-func (controlUnit ControlUnit) sendMessage(request commtypes.RequestMsg) {
+func (controlUnit ControlUnit) constructMessage(request commtypes.RequestMsg) commtypes.Message {
 	message := commtypes.Message{
 		Type:  commtypes.Request,
 		MsgID: controlUnit.messageID,
@@ -24,7 +23,7 @@ func (controlUnit ControlUnit) sendMessage(request commtypes.RequestMsg) {
 	message.Content = request.Content
 
 	fmt.Printf("Sending mesage: %#v\n", message)
-	controlUnit.Channel <- message
+	return message
 }
 
 func (controlUnit *ControlUnit) receiveMessage() commtypes.Message {
@@ -34,14 +33,6 @@ func (controlUnit *ControlUnit) receiveMessage() commtypes.Message {
 
 	controlUnit.messageID = uint16(message.MsgID) + 1
 	return message
-}
-
-// creates a new channel and adds it to the Middleware and the controlUnit
-func (controlUnit *ControlUnit) RegisterClient(commmiddleware *commmiddleware.Middleware) {
-	channel := make(chan commtypes.Message)
-	clientID := commmiddleware.RegisterClient(channel)
-	controlUnit.clientID = uint8(clientID)
-	controlUnit.Channel = channel
 }
 
 func (controlUnit ControlUnit) GetClientID() uint8 {

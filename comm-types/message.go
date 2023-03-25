@@ -34,3 +34,8 @@ const (
 )
 
 var ProcIDs = [...]RemoteProcID{GetString, GetConfirmation, Info}
+
+func (message Message) ToByte() []byte {
+
+	return nil
+}

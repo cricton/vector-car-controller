@@ -1,74 +1,90 @@
 package commmiddleware
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
+	"log"
+	"net"
 
 	commtypes "github.com/cricton/comm-types"
 )
 
 type Middleware struct {
-	CurrentMsgID int
-	Channels     []chan commtypes.Message
-	HMIChannel   chan commtypes.Message
+	IncomingChannel chan commtypes.Message
 }
 
-func SendMessage(commtypes.Message) int {
-	return 1
-}
+func (middleware *Middleware) StartTCPServer(address string) {
+	fmt.Println("Listening to address: ", address)
 
-// Fetches an unused messageID and updates the value
-func (middleware *Middleware) GetAndIncMsgID() int {
-	msgID := middleware.CurrentMsgID
-	middleware.CurrentMsgID = middleware.CurrentMsgID + 1
-	return msgID
-}
+	listener, err := net.Listen("tcp", address)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer listener.Close()
 
-func (middleware *Middleware) RegisterClient(channel chan commtypes.Message) int {
-	middleware.Channels = append(middleware.Channels, channel)
-
-	//get position of channel in array to use as ID
-	clientID := len(middleware.Channels)
-	return clientID
-}
-
-// register HMI module
-func (middleware *Middleware) RegisterHMI(channel chan commtypes.Message) {
-	middleware.HMIChannel = channel
-}
-
-func (middleware Middleware) getChannelID(message commtypes.Message) chan commtypes.Message {
-	return middleware.Channels[message.SgID-1]
-}
-
-// Blocking function. Sends message to the HMI module and awaits a response
-func (middleware Middleware) handleSGMessage(message commtypes.Message) {
-	//sends message to HMI
-	middleware.HMIChannel <- message
-
-	//waits for response of HMI
-	message = <-middleware.HMIChannel
-
-	//sends response to SG
-	channel := middleware.getChannelID(message)
-	channel <- message
-}
-
-// SG mainloop; Waits random amount of milliseconds and sends a random message to the HMI-controller
-func (middleware Middleware) Mainloop() {
-	fmt.Println("Starting up middleware...")
+	// create a temp buffer
+	recBuffer := make([]byte, 512)
 	for {
-
-		//time.Sleep(time.Millisecond)
-		//check all channels for incoming messages
-
-		for _, channel := range middleware.Channels {
-			select {
-			//if a message is received it gets passed to the HMI and waits for a response
-			case message := <-channel:
-				middleware.handleSGMessage(message)
-			default:
-			}
+		connection, err := listener.Accept()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		_, err = connection.Read(recBuffer)
+		if err != nil {
+			fmt.Println(err)
+			return
 		}
 
+		// convert bytes into Buffer (which implements io.Reader/io.Writer)
+		tmpbuff := bytes.NewBuffer(recBuffer)
+
+		tmpstruct := new(commtypes.Message)
+
+		// creates a decoder object
+		gobobj := gob.NewDecoder(tmpbuff)
+
+		// decodes buffer and unmarshals it into a Message struct
+		gobobj.Decode(tmpstruct)
+
+		// lets print out!
+		fmt.Println(tmpstruct) // reflects.TypeOf(tmpstruct) == Message{}
+		middleware.IncomingChannel <- *tmpstruct
+
 	}
+	//if received send to local channel
+	//middleware.incomingChannel <- received
+}
+
+func (middleware Middleware) SendMessage(message commtypes.Message, destinationAddress string) {
+	//Connect to address and send message
+	fmt.Println("Dialing...")
+	c, err := net.Dial("tcp", destinationAddress)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	//Serialize struct to send over TCP
+	var byteBuffer bytes.Buffer
+	enc := gob.NewEncoder(&byteBuffer)
+	err = enc.Encode(message)
+	if err != nil {
+		log.Fatal("encode error:", err)
+	}
+
+	bytes := byteBuffer.Bytes()
+
+	c.Write(bytes)
+
+	c.Close()
+
+}
+
+func (middleware Middleware) ReceiveMessage() commtypes.Message {
+	response := <-middleware.IncomingChannel
+
+	return response
 }

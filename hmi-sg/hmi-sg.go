@@ -10,7 +10,9 @@ import (
 )
 
 type HMI struct {
+	LocalAddress string
 	Channel      chan commtypes.Message
+	Middleware   *commmiddleware.Middleware
 	GUIconnector graphicinterface.GUI
 }
 
@@ -39,28 +41,25 @@ func (hmi HMI) ReceiveMessage() commtypes.Message {
 }
 
 // reads a message from the channel, processes it and sends a response
-func (hmi HMI) SendMessage(message commtypes.Message) {
+func (hmi HMI) SendResponse(message commtypes.Message) {
 
 	response := hmi.handleMessage(message)
-	hmi.Channel <- response
+	hmi.Middleware.SendMessage(response, "127.0.0.1:8081")
 
 }
 
 // reads a message from the channel, processes it and sends a response
 func (hmi HMI) HMI_comm_loop() int {
 
+	//Start local server to listen to incoming messages
+	go hmi.Middleware.StartTCPServer(hmi.LocalAddress)
+
 	for {
-		message := hmi.ReceiveMessage()
-		hmi.SendMessage(message)
+		message := hmi.Middleware.ReceiveMessage()
+		fmt.Println("Received something at HMI")
+		hmi.SendResponse(message)
 	}
 
-}
-
-// creates a new channel and adds it to the Middleware and the controlUnit
-func (hmi *HMI) RegisterHMI(commmiddleware *commmiddleware.Middleware) {
-	channel := make(chan commtypes.Message)
-	commmiddleware.RegisterHMI(channel)
-	hmi.Channel = channel
 }
 
 // read contents, get user input, create new message

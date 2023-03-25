@@ -19,9 +19,6 @@ func (sg Infosg) Mainloop() {
 	fmt.Println("Starting Driving Assistant SG")
 	for {
 
-		request := sg.constructRandomMessage()
-
-		sg.ControlUnit.sendMessage(request)
 		sg.ControlUnit.receiveMessage()
 
 		time.Sleep(time.Duration(rand.Intn(5)+3) * time.Second)
