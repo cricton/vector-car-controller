@@ -92,7 +92,6 @@ func (hmi HMI) handleMessage(request commtypes.Message) commtypes.Message {
 	//construct response message
 	response := commtypes.Message{
 		Type:       commtypes.Response,
-		MsgID:      request.MsgID + 1,
 		SgID:       request.SgID,
 		Content:    returned.Content,
 		ReturnCode: returned.Code}

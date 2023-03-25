@@ -28,12 +28,11 @@ func (middleware *Middleware) StartUDPServer(address net.UDPAddr) {
 	recBuffer := make([]byte, 512)
 	for {
 
-		_, remoteaddr, err := listener.ReadFromUDP(recBuffer)
+		_, _, err := listener.ReadFromUDP(recBuffer)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		fmt.Println(remoteaddr)
 
 		// convert bytes into Buffer (which implements io.Reader/io.Writer)
 		tmpbuff := bytes.NewBuffer(recBuffer)

@@ -19,12 +19,14 @@ func main() {
 	SG0Addr := net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 8081}
 	SG1Addr := net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 8082}
 
-	sg1 := &applikationssg.Airbacksg{
+	sg1 := &applikationssg.ControlUnit{
+		Name:         "Airbag Control Unit",
 		ID:           0,
 		LocalAddress: SG0Addr,
 		HMIAddress:   HMIAddr,
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan commtypes.Message)},
 	}
+	sg1.AddRequest(commtypes.RequestMsg{RpID: commtypes.GetConfirmation, Content: "Idle too long, disable Airbag?"})
 
 	go sg1.Mainloop()
 
@@ -35,8 +37,5 @@ func main() {
 	}
 
 	hmi.HMI_main_loop()
-	//go sg1.Mainloop()
-
-	//hmi.HMI_main_loop()
 
 }

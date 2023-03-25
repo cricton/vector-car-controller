@@ -5,7 +5,6 @@ import graphicinterface "github.com/cricton/graphic-interface"
 type Message struct {
 	Type       RequestResponse
 	SgID       uint8
-	MsgID      uint16
 	RpID       RemoteProcID
 	ReturnCode graphicinterface.ReturnType
 	Content    string
