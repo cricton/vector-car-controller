@@ -18,12 +18,14 @@ type GUI struct {
 	RequestLabel    *widget.Label
 	ResponseChannel chan ReturnTuple
 	UserEntry       strings.Builder
+	inputLabel      *widget.Label
+
 	//--------for testing--------//
-	inputLabel  *widget.Label
 	enterButton *widget.Button
 }
 
-func (gui GUI) GetConfirmation(request string) dialog.Dialog {
+func (gui GUI) GetConfirmation(request string) {
+
 	d := dialog.NewConfirm("Please confirm!", request,
 		func(b bool) {
 			if b {
@@ -34,17 +36,16 @@ func (gui GUI) GetConfirmation(request string) dialog.Dialog {
 		}, gui.MainWindow)
 	d.Show()
 
-	return d
 }
 
-func (gui GUI) ShowInfo(request string) dialog.Dialog {
+func (gui GUI) ShowInfo(request string) {
 	d := dialog.NewInformation("Info!", request, gui.MainWindow)
+
 	d.SetOnClosed(func() {
 		gui.ResponseChannel <- ReturnTuple{Content: "", Code: INFO}
 	})
 	d.Show()
 
-	return d
 }
 
 // poll until a response was given
@@ -160,10 +161,6 @@ func (gui *GUI) SetupGUI() {
 
 	myCanvas.SetContent(parentContainer)
 
-}
-
-func (gui GUI) GetInputLabel() *widget.Label {
-	return gui.inputLabel
 }
 
 func (gui GUI) GetEnterButton() *widget.Button {
