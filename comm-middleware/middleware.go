@@ -14,10 +14,10 @@ type Middleware struct {
 	IncomingChannel chan commtypes.Message
 }
 
-func (middleware *Middleware) StartTCPServer(address string) {
+func (middleware *Middleware) StartUDPServer(address net.UDPAddr) {
 	fmt.Println("Listening to address: ", address)
 
-	listener, err := net.Listen("tcp", address)
+	listener, err := net.ListenUDP("udp", &address)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -27,16 +27,13 @@ func (middleware *Middleware) StartTCPServer(address string) {
 	// create a temp buffer
 	recBuffer := make([]byte, 512)
 	for {
-		connection, err := listener.Accept()
+
+		_, remoteaddr, err := listener.ReadFromUDP(recBuffer)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		_, err = connection.Read(recBuffer)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+		fmt.Println(remoteaddr)
 
 		// convert bytes into Buffer (which implements io.Reader/io.Writer)
 		tmpbuff := bytes.NewBuffer(recBuffer)
@@ -49,8 +46,6 @@ func (middleware *Middleware) StartTCPServer(address string) {
 		// decodes buffer and unmarshals it into a Message struct
 		gobobj.Decode(tmpstruct)
 
-		// lets print out!
-		fmt.Println(tmpstruct) // reflects.TypeOf(tmpstruct) == Message{}
 		middleware.IncomingChannel <- *tmpstruct
 
 	}
@@ -58,10 +53,10 @@ func (middleware *Middleware) StartTCPServer(address string) {
 	//middleware.incomingChannel <- received
 }
 
-func (middleware Middleware) SendMessage(message commtypes.Message, destinationAddress string) {
+func (middleware Middleware) SendMessage(message commtypes.Message, destinationAddress net.UDPAddr) {
 	//Connect to address and send message
 	fmt.Println("Dialing...")
-	c, err := net.Dial("tcp", destinationAddress)
+	c, err := net.Dial("udp", destinationAddress.String())
 	if err != nil {
 		fmt.Println(err)
 		return

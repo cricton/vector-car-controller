@@ -1,15 +1,12 @@
 package main
 
 import (
+	"net"
+
 	applikationssg "github.com/cricton/applikations-sg"
 	commmiddleware "github.com/cricton/comm-middleware"
 	commtypes "github.com/cricton/comm-types"
 	hmisg "github.com/cricton/hmi-sg"
-)
-
-const (
-	HMIAddr string = "127.0.0.1:8080"
-	SG1Addr string = "127.0.0.1:8081"
 )
 
 func main() {
@@ -18,8 +15,13 @@ func main() {
 	//start Applikations-SG
 
 	//TODO read this from config file?
+	HMIAddr := net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 8080}
+	SG0Addr := net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 8081}
+	SG1Addr := net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 8082}
+
 	sg1 := &applikationssg.Airbacksg{
-		LocalAddress: SG1Addr,
+		ID:           0,
+		LocalAddress: SG0Addr,
 		HMIAddress:   HMIAddr,
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan commtypes.Message)},
 	}
@@ -28,6 +30,7 @@ func main() {
 
 	hmi := hmisg.HMI{
 		LocalAddress: HMIAddr,
+		SGAddresses:  [16]net.UDPAddr{SG0Addr, SG1Addr},
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan commtypes.Message)},
 	}
 

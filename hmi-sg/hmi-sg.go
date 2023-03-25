@@ -2,6 +2,7 @@ package hmisg
 
 import (
 	"fmt"
+	"net"
 
 	"fyne.io/fyne/v2/app"
 	commmiddleware "github.com/cricton/comm-middleware"
@@ -10,7 +11,8 @@ import (
 )
 
 type HMI struct {
-	LocalAddress string
+	LocalAddress net.UDPAddr
+	SGAddresses  [16]net.UDPAddr
 	Channel      chan commtypes.Message
 	Middleware   *commmiddleware.Middleware
 	GUIconnector graphicinterface.GUI
@@ -36,15 +38,16 @@ func (hmi HMI) HMI_main_loop() {
 // Waits for a message to arrive from the middleware
 func (hmi HMI) ReceiveMessage() commtypes.Message {
 
-	message := <-hmi.Channel
+	message := hmi.Middleware.ReceiveMessage()
+
 	return message
 }
 
 // reads a message from the channel, processes it and sends a response
-func (hmi HMI) SendResponse(message commtypes.Message) {
+func (hmi HMI) SendResponse(message commtypes.Message, address net.UDPAddr) {
 
 	response := hmi.handleMessage(message)
-	hmi.Middleware.SendMessage(response, "127.0.0.1:8081")
+	hmi.Middleware.SendMessage(response, address)
 
 }
 
@@ -52,18 +55,19 @@ func (hmi HMI) SendResponse(message commtypes.Message) {
 func (hmi HMI) HMI_comm_loop() int {
 
 	//Start local server to listen to incoming messages
-	go hmi.Middleware.StartTCPServer(hmi.LocalAddress)
+	go hmi.Middleware.StartUDPServer(hmi.LocalAddress)
 
 	for {
-		message := hmi.Middleware.ReceiveMessage()
-		fmt.Println("Received something at HMI")
-		hmi.SendResponse(message)
+		message := hmi.ReceiveMessage()
+
+		hmi.SendResponse(message, hmi.SGAddresses[message.SgID])
 	}
 
 }
 
 // read contents, get user input, create new message
 func (hmi HMI) handleMessage(request commtypes.Message) commtypes.Message {
+
 	var returned graphicinterface.ReturnTuple
 
 	//switch depending on remote procedure ID
