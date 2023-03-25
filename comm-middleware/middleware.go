@@ -54,7 +54,6 @@ func (middleware *Middleware) StartUDPServer(address net.UDPAddr) {
 
 func (middleware Middleware) SendMessage(message commtypes.Message, destinationAddress net.UDPAddr) {
 	//Connect to address and send message
-	fmt.Println("Dialing...")
 	c, err := net.Dial("udp", destinationAddress.String())
 	if err != nil {
 		fmt.Println(err)

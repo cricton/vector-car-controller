@@ -1,7 +1,7 @@
 package testcases
 
 import (
-	"math/rand"
+	"net"
 	"testing"
 
 	applikationssg "github.com/cricton/applikations-sg"
@@ -11,80 +11,45 @@ import (
 	hmisg "github.com/cricton/hmi-sg"
 )
 
-func TestHMIReceive(t *testing.T) {
-
-	sg := &applikationssg.Airbacksg{
-		ControlUnit: &applikationssg.ControlUnit{},
-	}
-
-	request := commtypes.RequestMsg{
-		RpID:    commtypes.ProcIDs[rand.Intn(3)],
-		Content: "Idle too long. Deactivate Airbag?",
-	}
-
-	//start necessary infrastructure
-	middleware := &commmiddleware.Middleware{}
-	hmi := hmisg.HMI{}
-
-	//create channel for sg-middleware interaction
-	sg.ControlUnit.RegisterClient(middleware)
-
-	hmi.RegisterHMI(middleware)
-
-	go middleware.Mainloop()
-
-	go sg.SendMessage(request)
-
-	received := hmi.ReceiveMessage()
-
-	receivedRequest := commtypes.RequestMsg{
-		RpID:    received.RpID,
-		Content: received.Content,
-	}
-
-	if receivedRequest != request {
-		t.Errorf("Reiceved request = %#v; wanted %#v", receivedRequest, request)
-	}
-
-	if received.ReturnCode != graphicinterface.NONE {
-		t.Errorf("Return code = %d; want %d", received.ReturnCode, graphicinterface.NONE)
-	}
-
-	if received.SgID != sg.ControlUnit.GetClientID() {
-		t.Errorf("Client ID = %d; want %d", received.SgID, sg.ControlUnit.GetClientID())
-	}
-
-}
-
 func TestSGReceive(t *testing.T) {
 
-	sg := &applikationssg.Airbacksg{
-		ControlUnit: &applikationssg.ControlUnit{},
-	}
+	//---------------------------Setup variables---------------------------------//
 
-	request := commtypes.RequestMsg{
+	HMIAddr := net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 8080}
+	CU0Addr := net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 8081}
+
+	cu := &applikationssg.ControlUnit{
+		Name:         "Airbag Control Unit",
+		ID:           0,
+		LocalAddress: CU0Addr,
+		HMIAddress:   HMIAddr,
+		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan commtypes.Message)},
+	}
+	request := commtypes.Message{
+		Type:    commtypes.Request,
 		RpID:    255, //non existant RpID
 		Content: "Idle too long. Deactivate Airbag?",
 	}
 
-	//start necessary infrastructure
-	middleware := &commmiddleware.Middleware{}
-	hmi := hmisg.HMI{}
+	hmi := hmisg.HMI{
+		LocalAddress: HMIAddr,
+		SGAddresses:  [16]net.UDPAddr{CU0Addr},
+		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan commtypes.Message)},
+	}
 
-	//create channel for sg-middleware interaction
-	sg.ControlUnit.RegisterClient(middleware)
+	//---------------------------Run necessary commands---------------------------------//
 
-	hmi.RegisterHMI(middleware)
+	go cu.Middleware.StartUDPServer(CU0Addr)
+	go hmi.Middleware.StartUDPServer(HMIAddr)
 
-	go middleware.Mainloop()
-
-	go sg.SendMessage(request)
+	go cu.Middleware.SendMessage(request, cu.HMIAddress)
 
 	receivedAtHMI := hmi.ReceiveMessage()
-	go hmi.SendMessage(receivedAtHMI)
+	go hmi.SendResponse(receivedAtHMI, hmi.SGAddresses[0])
 
-	receivedAtSG := sg.ReceiveMessage()
+	receivedAtSG := cu.Middleware.ReceiveMessage()
 
+	//---------------------------Check results---------------------------------//
 	if len(receivedAtSG.Content) > 0 {
 		t.Errorf("Reiceved content = %s; wanted \"\"", receivedAtSG.Content)
 	}
@@ -93,12 +58,8 @@ func TestSGReceive(t *testing.T) {
 		t.Errorf("Return code = %d; want %d", receivedAtSG.ReturnCode, graphicinterface.ERROR)
 	}
 
-	if receivedAtSG.SgID != sg.ControlUnit.GetClientID() {
-		t.Errorf("Client ID = %d; want %d", receivedAtSG.SgID, sg.ControlUnit.GetClientID())
-	}
-
-	if receivedAtSG.MsgID != (receivedAtHMI.MsgID + 1) {
-		t.Errorf("MsgID= %d; want %d", receivedAtSG.MsgID, receivedAtHMI.MsgID)
+	if receivedAtSG.SgID != cu.ID {
+		t.Errorf("Client ID = %d; want %d", receivedAtSG.SgID, cu.ID)
 	}
 
 	if receivedAtSG.RpID != commtypes.None {

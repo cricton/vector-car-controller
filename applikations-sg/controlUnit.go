@@ -22,7 +22,7 @@ type ControlUnit struct {
 
 // SG mainloop; Waits random amount of milliseconds and sends a random message to the HMI-controller
 func (cu ControlUnit) Mainloop() {
-	fmt.Println("Starting Airback SG")
+	fmt.Println("Starting ", cu.Name)
 	time.Sleep(time.Duration(rand.Intn(5)+3) * time.Second)
 	go cu.Middleware.StartUDPServer(cu.LocalAddress)
 
