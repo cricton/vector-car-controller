@@ -8,27 +8,26 @@ import (
 	"fyne.io/fyne/v2/test"
 	applikationssg "github.com/cricton/applikations-sg"
 	commmiddleware "github.com/cricton/comm-middleware"
-	commtypes "github.com/cricton/comm-types"
-	graphicinterface "github.com/cricton/graphic-interface"
 	hmisg "github.com/cricton/hmi-sg"
+	types "github.com/cricton/types"
 )
 
 func TestIllegalRpID(t *testing.T) {
 
 	//---------------------------Setup variables---------------------------------//
 
-	HMIAddr := net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 8082}
-	CU0Addr := net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 8083}
+	HMIAddr := net.UDPAddr{Port: 8082}
+	CU0Addr := net.UDPAddr{Port: 8083}
 
 	cu := &applikationssg.ControlUnit{
 		Name:         "Airbag Control Unit",
 		ID:           0,
 		LocalAddress: CU0Addr,
 		HMIAddress:   HMIAddr,
-		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan commtypes.Message)},
+		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
-	request := commtypes.Message{
-		Type:    commtypes.Request,
+	request := types.Message{
+		Type:    types.Request,
 		RpID:    255, //non existant RpID
 		Content: "Idle too long. Deactivate Airbag?",
 	}
@@ -36,7 +35,7 @@ func TestIllegalRpID(t *testing.T) {
 	hmi := hmisg.HMI{
 		LocalAddress: HMIAddr,
 		SGAddresses:  [16]net.UDPAddr{CU0Addr},
-		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan commtypes.Message)},
+		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
 
 	//---------------------------Run necessary commands---------------------------------//
@@ -56,16 +55,16 @@ func TestIllegalRpID(t *testing.T) {
 		t.Errorf("Reiceved content = %s; wanted \"\"", receivedAtSG.Content)
 	}
 
-	if receivedAtSG.ReturnCode != graphicinterface.ERROR {
-		t.Errorf("Return code = %d; want %d", receivedAtSG.ReturnCode, graphicinterface.ERROR)
+	if receivedAtSG.ReturnCode != types.ERROR {
+		t.Errorf("Return code = %d; want %d", receivedAtSG.ReturnCode, types.ERROR)
 	}
 
 	if receivedAtSG.SgID != cu.ID {
 		t.Errorf("Client ID = %d; want %d", receivedAtSG.SgID, cu.ID)
 	}
 
-	if receivedAtSG.RpID != commtypes.None {
-		t.Errorf("Remote procedure= %d; want %d", receivedAtSG.RpID, graphicinterface.NONE)
+	if receivedAtSG.RpID != types.None {
+		t.Errorf("Remote procedure= %d; want %d", receivedAtSG.RpID, types.NONE)
 	}
 
 }
@@ -74,20 +73,20 @@ func TestGetString(t *testing.T) {
 
 	//---------------------------Setup variables----------------------------------------//
 
-	HMIAddr := net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 8080}
-	CU0Addr := net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 8081}
+	HMIAddr := net.UDPAddr{Port: 8080}
+	CU0Addr := net.UDPAddr{Port: 8081}
 
 	cu := &applikationssg.ControlUnit{
 		Name:         "Airbag Control Unit",
 		ID:           0,
 		LocalAddress: CU0Addr,
 		HMIAddress:   HMIAddr,
-		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan commtypes.Message)},
+		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
 
-	message := commtypes.Message{
-		Type:    commtypes.Request,
-		RpID:    commtypes.GetString,
+	message := types.Message{
+		Type:    types.Request,
+		RpID:    types.GetString,
 		Content: "Hello ...",
 	}
 	go cu.Middleware.StartUDPServer(cu.LocalAddress)
@@ -95,7 +94,7 @@ func TestGetString(t *testing.T) {
 	hmi := hmisg.HMI{
 		LocalAddress: HMIAddr,
 		SGAddresses:  [16]net.UDPAddr{CU0Addr},
-		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan commtypes.Message)},
+		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
 
 	//---------------------------Run necessary commands---------------------------------//
@@ -120,16 +119,16 @@ func TestGetString(t *testing.T) {
 		t.Errorf("Reiceved content = %s; wanted Hello World!", receivedAtSG.Content)
 	}
 
-	if receivedAtSG.ReturnCode != graphicinterface.STRING {
-		t.Errorf("Return code = %d; want %d", receivedAtSG.ReturnCode, graphicinterface.ERROR)
+	if receivedAtSG.ReturnCode != types.STRING {
+		t.Errorf("Return code = %d; want %d", receivedAtSG.ReturnCode, types.ERROR)
 	}
 
 	if receivedAtSG.SgID != cu.ID {
 		t.Errorf("Client ID = %d; want %d", receivedAtSG.SgID, cu.ID)
 	}
 
-	if receivedAtSG.RpID != commtypes.None {
-		t.Errorf("Remote procedure= %d; want %d", receivedAtSG.RpID, graphicinterface.NONE)
+	if receivedAtSG.RpID != types.None {
+		t.Errorf("Remote procedure= %d; want %d", receivedAtSG.RpID, types.NONE)
 	}
 }
 
@@ -137,20 +136,20 @@ func TestGetConfirmation(t *testing.T) {
 
 	//---------------------------Setup variables----------------------------------------//
 
-	HMIAddr := net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 8084}
-	CU0Addr := net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 8085}
+	HMIAddr := net.UDPAddr{Port: 8084}
+	CU0Addr := net.UDPAddr{Port: 8085}
 
 	cu := &applikationssg.ControlUnit{
 		Name:         "Airbag Control Unit",
 		ID:           0,
 		LocalAddress: CU0Addr,
 		HMIAddress:   HMIAddr,
-		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan commtypes.Message)},
+		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
 
-	message := commtypes.Message{
-		Type:    commtypes.Request,
-		RpID:    commtypes.GetConfirmation,
+	message := types.Message{
+		Type:    types.Request,
+		RpID:    types.GetConfirmation,
 		Content: "Hello?",
 	}
 	go cu.Middleware.StartUDPServer(cu.LocalAddress)
@@ -158,7 +157,7 @@ func TestGetConfirmation(t *testing.T) {
 	hmi := hmisg.HMI{
 		LocalAddress: HMIAddr,
 		SGAddresses:  [16]net.UDPAddr{CU0Addr},
-		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan commtypes.Message)},
+		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
 
 	//---------------------------Run necessary commands---------------------------------//
@@ -169,14 +168,14 @@ func TestGetConfirmation(t *testing.T) {
 
 	cu.Middleware.SendMessage(message, cu.HMIAddress)
 
-	var accepted graphicinterface.ReturnType
+	var accepted types.ReturnType
 
 	if rand.Intn(2) == 0 {
-		accepted = graphicinterface.ACCEPTED
+		accepted = types.ACCEPTED
 	} else {
-		accepted = graphicinterface.DECLINED
+		accepted = types.DECLINED
 	}
-	hmi.GUIconnector.ResponseChannel <- graphicinterface.ReturnTuple{Content: "", Code: accepted}
+	hmi.GUIconnector.ResponseChannel <- types.ReturnTuple{Content: "", Code: accepted}
 
 	receivedAtSG := cu.Middleware.ReceiveMessage()
 
@@ -194,8 +193,8 @@ func TestGetConfirmation(t *testing.T) {
 		t.Errorf("Client ID = %d; want %d", receivedAtSG.SgID, cu.ID)
 	}
 
-	if receivedAtSG.RpID != commtypes.None {
-		t.Errorf("Remote procedure= %d; want %d", receivedAtSG.RpID, graphicinterface.NONE)
+	if receivedAtSG.RpID != types.None {
+		t.Errorf("Remote procedure= %d; want %d", receivedAtSG.RpID, types.NONE)
 	}
 
 }
@@ -204,20 +203,20 @@ func TestGetInfo(t *testing.T) {
 
 	//---------------------------Setup variables----------------------------------------//
 
-	HMIAddr := net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 8086}
-	CU0Addr := net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 8087}
+	HMIAddr := net.UDPAddr{Port: 8086}
+	CU0Addr := net.UDPAddr{Port: 8087}
 
 	cu := &applikationssg.ControlUnit{
 		Name:         "Airbag Control Unit",
 		ID:           0,
 		LocalAddress: CU0Addr,
 		HMIAddress:   HMIAddr,
-		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan commtypes.Message)},
+		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
 
-	message := commtypes.Message{
-		Type:    commtypes.Request,
-		RpID:    commtypes.Info,
+	message := types.Message{
+		Type:    types.Request,
+		RpID:    types.Info,
 		Content: "Hello!",
 	}
 	go cu.Middleware.StartUDPServer(cu.LocalAddress)
@@ -225,7 +224,7 @@ func TestGetInfo(t *testing.T) {
 	hmi := hmisg.HMI{
 		LocalAddress: HMIAddr,
 		SGAddresses:  [16]net.UDPAddr{CU0Addr},
-		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan commtypes.Message)},
+		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
 
 	//---------------------------Run necessary commands---------------------------------//
@@ -236,7 +235,7 @@ func TestGetInfo(t *testing.T) {
 
 	cu.Middleware.SendMessage(message, cu.HMIAddress)
 
-	hmi.GUIconnector.ResponseChannel <- graphicinterface.ReturnTuple{Content: "", Code: graphicinterface.INFO}
+	hmi.GUIconnector.ResponseChannel <- types.ReturnTuple{Content: "", Code: types.INFO}
 
 	receivedAtSG := cu.Middleware.ReceiveMessage()
 
@@ -246,15 +245,15 @@ func TestGetInfo(t *testing.T) {
 		t.Errorf("Reiceved content = %s; wanted \"\"", receivedAtSG.Content)
 	}
 
-	if receivedAtSG.ReturnCode != graphicinterface.INFO {
-		t.Errorf("Return code = %d; want %d", receivedAtSG.ReturnCode, graphicinterface.INFO)
+	if receivedAtSG.ReturnCode != types.INFO {
+		t.Errorf("Return code = %d; want %d", receivedAtSG.ReturnCode, types.INFO)
 	}
 
 	if receivedAtSG.SgID != cu.ID {
 		t.Errorf("Client ID = %d; want %d", receivedAtSG.SgID, cu.ID)
 	}
 
-	if receivedAtSG.RpID != commtypes.None {
-		t.Errorf("Remote procedure= %d; want %d", receivedAtSG.RpID, graphicinterface.NONE)
+	if receivedAtSG.RpID != types.None {
+		t.Errorf("Remote procedure= %d; want %d", receivedAtSG.RpID, types.NONE)
 	}
 }

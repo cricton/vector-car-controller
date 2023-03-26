@@ -7,15 +7,15 @@ import (
 	"log"
 	"net"
 
-	commtypes "github.com/cricton/comm-types"
+	"github.com/cricton/types"
 )
 
 type Middleware struct {
-	IncomingChannel chan commtypes.Message
+	IncomingChannel chan types.Message
 }
 
 func (middleware *Middleware) StartUDPServer(address net.UDPAddr) {
-	fmt.Println("Listening to address: ", address)
+	fmt.Println("Listening to port: ", address.Port)
 
 	listener, err := net.ListenUDP("udp", &address)
 	if err != nil {
@@ -37,7 +37,7 @@ func (middleware *Middleware) StartUDPServer(address net.UDPAddr) {
 		// convert bytes into Buffer (which implements io.Reader/io.Writer)
 		tmpbuff := bytes.NewBuffer(recBuffer)
 
-		tmpstruct := new(commtypes.Message)
+		tmpstruct := new(types.Message)
 
 		// creates a decoder object
 		gobobj := gob.NewDecoder(tmpbuff)
@@ -52,7 +52,7 @@ func (middleware *Middleware) StartUDPServer(address net.UDPAddr) {
 	//middleware.incomingChannel <- received
 }
 
-func (middleware Middleware) SendMessage(message commtypes.Message, destinationAddress net.UDPAddr) {
+func (middleware Middleware) SendMessage(message types.Message, destinationAddress net.UDPAddr) {
 	//Connect to address and send message
 	c, err := net.Dial("udp", destinationAddress.String())
 	if err != nil {
@@ -76,7 +76,7 @@ func (middleware Middleware) SendMessage(message commtypes.Message, destinationA
 
 }
 
-func (middleware Middleware) ReceiveMessage() commtypes.Message {
+func (middleware Middleware) ReceiveMessage() types.Message {
 	response := <-middleware.IncomingChannel
 
 	return response

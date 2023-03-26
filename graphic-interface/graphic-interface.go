@@ -11,12 +11,13 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
+	"github.com/cricton/types"
 )
 
 type GUI struct {
 	MainWindow      fyne.Window
 	RequestLabel    *widget.Label
-	ResponseChannel chan ReturnTuple
+	ResponseChannel chan types.ReturnTuple
 	UserEntry       strings.Builder
 	inputLabel      *widget.Label
 
@@ -29,9 +30,9 @@ func (gui GUI) GetConfirmation(request string) {
 	d := dialog.NewConfirm("Please confirm!", request,
 		func(b bool) {
 			if b {
-				gui.ResponseChannel <- ReturnTuple{Content: "", Code: ACCEPTED}
+				gui.ResponseChannel <- types.ReturnTuple{Content: "", Code: types.ACCEPTED}
 			} else {
-				gui.ResponseChannel <- ReturnTuple{Content: "", Code: DECLINED}
+				gui.ResponseChannel <- types.ReturnTuple{Content: "", Code: types.DECLINED}
 			}
 		}, gui.MainWindow)
 	d.Show()
@@ -42,14 +43,14 @@ func (gui GUI) ShowInfo(request string) {
 	d := dialog.NewInformation("Info!", request, gui.MainWindow)
 
 	d.SetOnClosed(func() {
-		gui.ResponseChannel <- ReturnTuple{Content: "", Code: INFO}
+		gui.ResponseChannel <- types.ReturnTuple{Content: "", Code: types.INFO}
 	})
 	d.Show()
 
 }
 
 // poll until a response was given
-func (gui *GUI) AwaitResponse() ReturnTuple {
+func (gui *GUI) AwaitResponse() types.ReturnTuple {
 
 	ReturnTuple := <-gui.ResponseChannel
 
@@ -64,7 +65,7 @@ func (gui *GUI) makeKeyboardRows() (*fyne.Container, *fyne.Container, *fyne.Cont
 	// Build first row of keys
 	keyboardRow1 := container.New(layout.NewGridLayout(12))
 	keyboardRow1.Add(layout.NewSpacer())
-	for _, button := range keyboardMapping1 {
+	for _, button := range types.KeyboardMapping1 {
 		letter := button
 
 		keyboardRow1.Add(widget.NewButton(button, func() {
@@ -89,7 +90,7 @@ func (gui *GUI) makeKeyboardRows() (*fyne.Container, *fyne.Container, *fyne.Cont
 		gui.inputLabel.SetText(gui.UserEntry.String())
 	}))
 
-	for _, button := range keyboardMapping2 {
+	for _, button := range types.KeyboardMapping2 {
 		letter := button
 		keyboardRow2.Add(widget.NewButton(button, func() {
 			if len(gui.RequestLabel.Text) > 0 {
@@ -107,7 +108,7 @@ func (gui *GUI) makeKeyboardRows() (*fyne.Container, *fyne.Container, *fyne.Cont
 		userEntry := gui.UserEntry.String()
 		gui.UserEntry.Reset()
 		gui.RequestLabel.SetText("")
-		gui.ResponseChannel <- ReturnTuple{Content: userEntry, Code: STRING}
+		gui.ResponseChannel <- types.ReturnTuple{Content: userEntry, Code: types.STRING}
 		fmt.Println(userEntry)
 		gui.inputLabel.SetText(gui.UserEntry.String())
 
@@ -115,7 +116,7 @@ func (gui *GUI) makeKeyboardRows() (*fyne.Container, *fyne.Container, *fyne.Cont
 	keyboardRow3.Add(gui.enterButton)
 
 	keyboardRow3.Add(widget.NewButton("Mic", func() {}))
-	for _, button := range keyboardMapping3 {
+	for _, button := range types.KeyboardMapping3 {
 		letter := button
 		keyboardRow3.Add(widget.NewButton(button, func() {
 			if len(gui.RequestLabel.Text) > 0 {

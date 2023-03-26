@@ -1,13 +1,27 @@
-package commtypes
-
-import graphicinterface "github.com/cricton/graphic-interface"
+package types
 
 type Message struct {
 	Type       RequestResponse
 	SgID       uint8
 	RpID       RemoteProcID
-	ReturnCode graphicinterface.ReturnType
+	ReturnCode ReturnType
 	Content    string
+}
+
+type ReturnType uint8
+
+const (
+	NONE     ReturnType = 0
+	ACCEPTED ReturnType = 1
+	DECLINED ReturnType = 2
+	INFO     ReturnType = 3
+	STRING   ReturnType = 4
+	ERROR    ReturnType = 5
+)
+
+type ReturnTuple struct {
+	Content string
+	Code    ReturnType
 }
 
 type RequestMsg struct {

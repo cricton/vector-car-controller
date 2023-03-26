@@ -7,7 +7,7 @@ import (
 	"time"
 
 	commmiddleware "github.com/cricton/comm-middleware"
-	commtypes "github.com/cricton/comm-types"
+	"github.com/cricton/types"
 )
 
 // Create cu struct using composition
@@ -17,7 +17,7 @@ type ControlUnit struct {
 	LocalAddress net.UDPAddr
 	HMIAddress   net.UDPAddr
 	Middleware   *commmiddleware.Middleware
-	requests     []commtypes.RequestMsg
+	requests     []types.RequestMsg
 }
 
 // SG mainloop; Waits random amount of milliseconds and sends a random message to the HMI-controller
@@ -36,10 +36,10 @@ func (cu ControlUnit) Mainloop() {
 	}
 }
 
-func (cu ControlUnit) constructRandomMessage() commtypes.Message {
+func (cu ControlUnit) constructRandomMessage() types.Message {
 
 	if len(cu.requests) <= 0 {
-		requestMessage := commtypes.Message{
+		requestMessage := types.Message{
 			SgID:    cu.ID,
 			RpID:    0,
 			Content: "",
@@ -48,7 +48,7 @@ func (cu ControlUnit) constructRandomMessage() commtypes.Message {
 	}
 	request := cu.requests[rand.Intn(len(cu.requests))]
 
-	requestMessage := commtypes.Message{
+	requestMessage := types.Message{
 		SgID:    cu.ID,
 		RpID:    request.RpID,
 		Content: request.Content,
@@ -57,10 +57,10 @@ func (cu ControlUnit) constructRandomMessage() commtypes.Message {
 	return requestMessage
 }
 
-func (cu *ControlUnit) AddRequest(request commtypes.RequestMsg) {
+func (cu *ControlUnit) AddRequest(request types.RequestMsg) {
 	cu.requests = append(cu.requests, request)
 }
 
-func (cu ControlUnit) GetRequest() []commtypes.RequestMsg {
+func (cu ControlUnit) GetRequest() []types.RequestMsg {
 	return cu.requests
 }
