@@ -15,7 +15,6 @@ type Middleware struct {
 }
 
 func (middleware *Middleware) StartUDPServer(address net.UDPAddr) {
-	fmt.Println("Listening to port: ", address.Port)
 
 	listener, err := net.ListenUDP("udp", &address)
 	if err != nil {
@@ -25,32 +24,34 @@ func (middleware *Middleware) StartUDPServer(address net.UDPAddr) {
 	defer listener.Close()
 
 	// create a temp buffer
-	recBuffer := make([]byte, 512)
+	receiveBuffer := make([]byte, 512)
 	for {
 
-		_, _, err := listener.ReadFromUDP(recBuffer)
+		_, _, err := listener.ReadFromUDP(receiveBuffer)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 
 		// convert bytes into Buffer (which implements io.Reader/io.Writer)
-		tmpbuff := bytes.NewBuffer(recBuffer)
+		tmpbuff := bytes.NewBuffer(receiveBuffer)
 
-		tmpstruct := new(types.Message)
+		messageStruct := new(types.Message)
 
 		// creates a decoder object
-		gobobj := gob.NewDecoder(tmpbuff)
+		gobDecoder := gob.NewDecoder(tmpbuff)
 
 		// decodes buffer and unmarshals it into a Message struct
-		gobobj.Decode(tmpstruct)
+		gobDecoder.Decode(messageStruct)
 
-		middleware.IncomingChannel <- *tmpstruct
+		// pass received message to internal channel
+		middleware.IncomingChannel <- *messageStruct
 
 	}
 }
 
 func (middleware Middleware) SendMessage(message types.Message, destinationAddress net.UDPAddr) {
+
 	//Connect to address and send message
 	c, err := net.Dial("udp", destinationAddress.String())
 	if err != nil {
@@ -58,10 +59,10 @@ func (middleware Middleware) SendMessage(message types.Message, destinationAddre
 		return
 	}
 
-	//Serialize struct to send over TCP
+	//Serialize struct to send over UDP
 	var byteBuffer bytes.Buffer
-	enc := gob.NewEncoder(&byteBuffer)
-	err = enc.Encode(message)
+	gobEncoder := gob.NewEncoder(&byteBuffer)
+	err = gobEncoder.Encode(message)
 	if err != nil {
 		log.Fatal("encode error:", err)
 	}
