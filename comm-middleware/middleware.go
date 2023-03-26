@@ -48,8 +48,6 @@ func (middleware *Middleware) StartUDPServer(address net.UDPAddr) {
 		middleware.IncomingChannel <- *tmpstruct
 
 	}
-	//if received send to local channel
-	//middleware.incomingChannel <- received
 }
 
 func (middleware Middleware) SendMessage(message types.Message, destinationAddress net.UDPAddr) {

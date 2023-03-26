@@ -1,4 +1,4 @@
-package graphicinterface
+package hmisg
 
 import (
 	"fmt"
@@ -57,6 +57,7 @@ func (gui *GUI) AwaitResponse() types.ReturnTuple {
 	return ReturnTuple
 }
 
+// Displays a text prompt for the user to respond to
 func (gui GUI) GetString(request string) {
 	gui.RequestLabel.SetText(request)
 }
@@ -164,6 +165,7 @@ func (gui *GUI) SetupGUI() {
 
 }
 
+// Used for testing, returns reference to the keyboard enter button
 func (gui GUI) GetEnterButton() *widget.Button {
 	return gui.enterButton
 }

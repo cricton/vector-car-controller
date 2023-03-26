@@ -16,7 +16,8 @@ const (
 	DECLINED ReturnType = 2
 	INFO     ReturnType = 3
 	STRING   ReturnType = 4
-	ERROR    ReturnType = 5
+	REGISTER ReturnType = 5
+	ERROR    ReturnType = 6
 )
 
 type ReturnTuple struct {

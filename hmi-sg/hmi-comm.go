@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	commmiddleware "github.com/cricton/comm-middleware"
-	graphicinterface "github.com/cricton/graphic-interface"
 	"github.com/cricton/types"
 )
 
@@ -16,13 +15,13 @@ type HMI struct {
 	SGAddresses  [16]net.UDPAddr
 	Channel      chan types.Message
 	Middleware   *commmiddleware.Middleware
-	GUIconnector graphicinterface.GUI
+	GUIconnector GUI
 }
 
 func (hmi *HMI) PrepareGUI() fyne.Window {
 	application := app.New()
 	mainWindow := application.NewWindow("MHI Module")
-	hmi.GUIconnector = graphicinterface.GUI{MainWindow: mainWindow}
+	hmi.GUIconnector = GUI{MainWindow: mainWindow}
 	hmi.GUIconnector.ResponseChannel = make(chan types.ReturnTuple)
 	hmi.GUIconnector.SetupGUI()
 

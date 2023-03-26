@@ -2,6 +2,7 @@ package applikationssg
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"net"
 	"time"
@@ -39,12 +40,7 @@ func (cu ControlUnit) Mainloop() {
 func (cu ControlUnit) constructRandomMessage() types.Message {
 
 	if len(cu.requests) <= 0 {
-		requestMessage := types.Message{
-			SgID:    cu.ID,
-			RpID:    0,
-			Content: "",
-		}
-		return requestMessage
+		log.Fatal("no messages to be sent")
 	}
 	request := cu.requests[rand.Intn(len(cu.requests))]
 
