@@ -51,7 +51,7 @@ func (hmi HMI) ReceiveMessage() types.Message {
 	return message
 }
 
-// reads a message from the channel, processes it and sends a response
+// Reads a message from the channel, processes it and sends a response
 func (hmi *HMI) SendResponse(request types.Message) {
 
 	response := hmi.handleMessage(request)
@@ -60,7 +60,7 @@ func (hmi *HMI) SendResponse(request types.Message) {
 
 }
 
-// starts a udp server and waits for incoming messages
+// Starts a udp server and waits for incoming messages
 func (hmi *HMI) HMI_comm_loop() int {
 
 	//Start local server to listen to incoming messages
@@ -89,7 +89,7 @@ func (hmi *HMI) RegisterCU(request types.Message) types.ReturnTuple {
 	return types.ReturnTuple{Content: "", Code: types.ACCEPTED}
 }
 
-// read contents, get user input, create new message
+// Read contents, get user input, create new message
 func (hmi *HMI) handleMessage(request types.Message) types.Message {
 
 	var returned types.ReturnTuple
@@ -107,8 +107,10 @@ func (hmi *HMI) handleMessage(request types.Message) types.Message {
 	case types.GetConfirmation:
 		hmi.GUIconnector.GetConfirmation(request.Content)
 		returned = hmi.GUIconnector.AwaitResponse()
+
 	case types.Register:
 		returned = hmi.RegisterCU(request)
+
 	default:
 		//Respond with error code in case procedure ID does not exist
 		returned = types.ReturnTuple{Content: "", Code: types.ERROR}
