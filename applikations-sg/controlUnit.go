@@ -27,6 +27,9 @@ func (cu ControlUnit) Mainloop() {
 	time.Sleep(time.Duration(rand.Intn(5)+3) * time.Second)
 	go cu.Middleware.StartUDPServer(cu.LocalAddress)
 
+	//send registration message to HMI
+	cu.Register()
+
 	for {
 
 		request := cu.constructRandomMessage()
@@ -34,6 +37,21 @@ func (cu ControlUnit) Mainloop() {
 		response := cu.Middleware.ReceiveMessage()
 		fmt.Println("Received response: ", response)
 		time.Sleep(time.Duration(rand.Intn(5)+3) * time.Second)
+	}
+}
+
+func (cu ControlUnit) Register() {
+	registerMessage := types.Message{
+		SgID:    cu.ID,
+		RpID:    types.Register,
+		Content: cu.LocalAddress.String(),
+	}
+	cu.Middleware.SendMessage(registerMessage, cu.HMIAddress)
+
+	response := cu.Middleware.ReceiveMessage()
+
+	if response.ReturnCode != types.ACCEPTED {
+		log.Fatal("Could not register Control Unit ", cu.ID)
 	}
 }
 

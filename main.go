@@ -1,8 +1,6 @@
 package main
 
 import (
-	"net"
-
 	applikationssg "github.com/cricton/applikations-sg"
 	commmiddleware "github.com/cricton/comm-middleware"
 	hmisg "github.com/cricton/hmi-sg"
@@ -42,15 +40,14 @@ func main() {
 
 	hmi := hmisg.HMI{
 		LocalAddress: types.HMIAddr,
-		SGAddresses:  [16]net.UDPAddr{types.CU0Addr, types.CU1Addr, types.CU2Addr},
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
 
 	//---------------------------Start Main Loops---------------------------------//
 
 	go sg0.Mainloop()
-	go sg1.Mainloop()
-	go sg2.Mainloop()
+	//go sg1.Mainloop()
+	//go sg2.Mainloop()
 
 	hmi.HMI_main_loop()
 

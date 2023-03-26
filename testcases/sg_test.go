@@ -16,13 +16,14 @@ func TestIllegalRpID(t *testing.T) {
 
 	//---------------------------Setup variables---------------------------------//
 
-	HMIAddr := net.UDPAddr{Port: 8082}
-	CU0Addr := net.UDPAddr{Port: 8083}
+	ip := net.ParseIP("127.0.0.1")
+	HMIAddr := net.UDPAddr{IP: ip, Port: 8082}
+	CUAddr := net.UDPAddr{IP: ip, Port: 8083}
 
 	cu := &applikationssg.ControlUnit{
 		Name:         "Airbag Control Unit",
 		ID:           0,
-		LocalAddress: CU0Addr,
+		LocalAddress: CUAddr,
 		HMIAddress:   HMIAddr,
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
@@ -34,19 +35,23 @@ func TestIllegalRpID(t *testing.T) {
 
 	hmi := hmisg.HMI{
 		LocalAddress: HMIAddr,
-		SGAddresses:  [16]net.UDPAddr{CU0Addr},
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
 
 	//---------------------------Run necessary commands---------------------------------//
 
-	go cu.Middleware.StartUDPServer(CU0Addr)
+	//--Start UDP Servers--//
+	go cu.Middleware.StartUDPServer(CUAddr)
 	go hmi.Middleware.StartUDPServer(HMIAddr)
 
-	go cu.Middleware.SendMessage(request, cu.HMIAddress)
+	//--Register control unit--//
+	go cu.Register()
+	receivedAtHmi := hmi.ReceiveMessage()
+	hmi.SendResponse(receivedAtHmi)
 
+	go cu.Middleware.SendMessage(request, cu.HMIAddress)
 	receivedAtHMI := hmi.ReceiveMessage()
-	go hmi.SendResponse(receivedAtHMI, hmi.SGAddresses[0])
+	go hmi.SendResponse(receivedAtHMI)
 
 	receivedAtSG := cu.Middleware.ReceiveMessage()
 
@@ -73,13 +78,14 @@ func TestGetString(t *testing.T) {
 
 	//---------------------------Setup variables----------------------------------------//
 
-	HMIAddr := net.UDPAddr{Port: 8080}
-	CU0Addr := net.UDPAddr{Port: 8081}
+	ip := net.ParseIP("127.0.0.1")
+	HMIAddr := net.UDPAddr{IP: ip, Port: 8080}
+	CUAddr := net.UDPAddr{IP: ip, Port: 8081}
 
 	cu := &applikationssg.ControlUnit{
 		Name:         "Airbag Control Unit",
 		ID:           0,
-		LocalAddress: CU0Addr,
+		LocalAddress: CUAddr,
 		HMIAddress:   HMIAddr,
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
@@ -93,7 +99,6 @@ func TestGetString(t *testing.T) {
 
 	hmi := hmisg.HMI{
 		LocalAddress: HMIAddr,
-		SGAddresses:  [16]net.UDPAddr{CU0Addr},
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
 
@@ -102,6 +107,9 @@ func TestGetString(t *testing.T) {
 	hmi.PrepareGUI()
 
 	go hmi.HMI_comm_loop()
+
+	//--Register control unit--//
+	cu.Register()
 
 	cu.Middleware.SendMessage(message, cu.HMIAddress)
 
@@ -136,13 +144,14 @@ func TestGetConfirmation(t *testing.T) {
 
 	//---------------------------Setup variables----------------------------------------//
 
-	HMIAddr := net.UDPAddr{Port: 8084}
-	CU0Addr := net.UDPAddr{Port: 8085}
+	ip := net.ParseIP("127.0.0.1")
+	HMIAddr := net.UDPAddr{IP: ip, Port: 8084}
+	CUAddr := net.UDPAddr{IP: ip, Port: 8085}
 
 	cu := &applikationssg.ControlUnit{
 		Name:         "Airbag Control Unit",
 		ID:           0,
-		LocalAddress: CU0Addr,
+		LocalAddress: CUAddr,
 		HMIAddress:   HMIAddr,
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
@@ -152,19 +161,21 @@ func TestGetConfirmation(t *testing.T) {
 		RpID:    types.GetConfirmation,
 		Content: "Hello?",
 	}
-	go cu.Middleware.StartUDPServer(cu.LocalAddress)
 
 	hmi := hmisg.HMI{
 		LocalAddress: HMIAddr,
-		SGAddresses:  [16]net.UDPAddr{CU0Addr},
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
 
 	//---------------------------Run necessary commands---------------------------------//
 
+	go cu.Middleware.StartUDPServer(cu.LocalAddress)
 	hmi.PrepareGUI()
 
 	go hmi.HMI_comm_loop()
+
+	//--Register control unit--//
+	cu.Register()
 
 	cu.Middleware.SendMessage(message, cu.HMIAddress)
 
@@ -203,13 +214,14 @@ func TestGetInfo(t *testing.T) {
 
 	//---------------------------Setup variables----------------------------------------//
 
-	HMIAddr := net.UDPAddr{Port: 8086}
-	CU0Addr := net.UDPAddr{Port: 8087}
+	ip := net.ParseIP("127.0.0.1")
+	HMIAddr := net.UDPAddr{IP: ip, Port: 8086}
+	CUAddr := net.UDPAddr{IP: ip, Port: 8087}
 
 	cu := &applikationssg.ControlUnit{
 		Name:         "Airbag Control Unit",
 		ID:           0,
-		LocalAddress: CU0Addr,
+		LocalAddress: CUAddr,
 		HMIAddress:   HMIAddr,
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
@@ -219,19 +231,22 @@ func TestGetInfo(t *testing.T) {
 		RpID:    types.Info,
 		Content: "Hello!",
 	}
-	go cu.Middleware.StartUDPServer(cu.LocalAddress)
 
 	hmi := hmisg.HMI{
 		LocalAddress: HMIAddr,
-		SGAddresses:  [16]net.UDPAddr{CU0Addr},
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
 
 	//---------------------------Run necessary commands---------------------------------//
 
+	go cu.Middleware.StartUDPServer(cu.LocalAddress)
+
 	hmi.PrepareGUI()
 
 	go hmi.HMI_comm_loop()
+
+	//--Register control unit--//
+	cu.Register()
 
 	cu.Middleware.SendMessage(message, cu.HMIAddress)
 

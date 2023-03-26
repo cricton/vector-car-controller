@@ -16,8 +16,7 @@ const (
 	DECLINED ReturnType = 2
 	INFO     ReturnType = 3
 	STRING   ReturnType = 4
-	REGISTER ReturnType = 5
-	ERROR    ReturnType = 6
+	ERROR    ReturnType = 5
 )
 
 type ReturnTuple struct {
@@ -45,6 +44,7 @@ const (
 	GetString       RemoteProcID = 1
 	GetConfirmation RemoteProcID = 2
 	Info            RemoteProcID = 3
+	Register        RemoteProcID = 4
 )
 
 var ProcIDs = [...]RemoteProcID{GetString, GetConfirmation, Info}
