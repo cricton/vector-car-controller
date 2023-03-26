@@ -74,6 +74,7 @@ func (middleware Middleware) SendMessage(message types.Message, destinationAddre
 
 }
 
+// Blocking call to receive the next incoming message
 func (middleware Middleware) ReceiveMessage() types.Message {
 	response := <-middleware.IncomingChannel
 

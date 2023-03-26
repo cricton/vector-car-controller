@@ -1,7 +1,7 @@
 package types
 
 type Message struct {
-	Type       RequestResponse
+	Type       MessageType
 	SgID       uint8
 	RpID       RemoteProcID
 	ReturnCode ReturnType
@@ -24,16 +24,11 @@ type ReturnTuple struct {
 	Code    ReturnType
 }
 
-type RequestMsg struct {
-	RpID    RemoteProcID
-	Content string
-}
-
-type RequestResponse uint8
+type MessageType uint8
 
 const (
-	Request  RequestResponse = 0
-	Response RequestResponse = 1
+	Request  MessageType = 0
+	Response MessageType = 1
 )
 
 // Remote Procedure ID
@@ -47,9 +42,7 @@ const (
 	Register        RemoteProcID = 4
 )
 
-var ProcIDs = [...]RemoteProcID{GetString, GetConfirmation, Info}
-
-func (message Message) ToByte() []byte {
-
-	return nil
+type RequestMsg struct {
+	RpID    RemoteProcID
+	Content string
 }

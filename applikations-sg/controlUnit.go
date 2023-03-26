@@ -21,10 +21,10 @@ type ControlUnit struct {
 	requests     []types.RequestMsg
 }
 
-// SG mainloop; Waits random amount of milliseconds and sends a random message to the HMI-controller
+// SG mainloop; Waits random amount of seconds and sends a random message to the HMI-controller
 func (cu ControlUnit) Mainloop() {
 	fmt.Println("Starting ", cu.Name)
-	time.Sleep(time.Duration(rand.Intn(5)+3) * time.Second)
+	time.Sleep(time.Duration(rand.Intn(10)+3) * time.Second)
 	go cu.Middleware.StartUDPServer(cu.LocalAddress)
 
 	//send registration message to HMI
@@ -36,7 +36,7 @@ func (cu ControlUnit) Mainloop() {
 		cu.Middleware.SendMessage(request, cu.HMIAddress)
 		response := cu.Middleware.ReceiveMessage()
 		fmt.Println("Received response: ", response)
-		time.Sleep(time.Duration(rand.Intn(5)+3) * time.Second)
+		time.Sleep(time.Duration(rand.Intn(20)+3) * time.Second)
 	}
 }
 
@@ -75,6 +75,6 @@ func (cu *ControlUnit) AddRequest(request types.RequestMsg) {
 	cu.requests = append(cu.requests, request)
 }
 
-func (cu ControlUnit) GetRequest() []types.RequestMsg {
+func (cu ControlUnit) GetRequests() []types.RequestMsg {
 	return cu.requests
 }

@@ -16,7 +16,6 @@ import (
 type HMI struct {
 	LocalAddress net.UDPAddr
 	cuAddresses  [16]net.UDPAddr
-	Channel      chan types.Message
 	Middleware   *commmiddleware.Middleware
 	GUIconnector GUI
 }
@@ -44,7 +43,7 @@ func (hmi *HMI) HMI_main_loop() {
 
 }
 
-// Waits for a message to arrive from the middleware
+// Waits for a message to arrive from the middleware udp server, blocking call
 func (hmi HMI) ReceiveMessage() types.Message {
 
 	message := hmi.Middleware.ReceiveMessage()
@@ -53,15 +52,15 @@ func (hmi HMI) ReceiveMessage() types.Message {
 }
 
 // reads a message from the channel, processes it and sends a response
-func (hmi *HMI) SendResponse(message types.Message) {
+func (hmi *HMI) SendResponse(request types.Message) {
 
-	response := hmi.handleMessage(message)
-	sgAddress := hmi.cuAddresses[message.SgID]
+	response := hmi.handleMessage(request)
+	sgAddress := hmi.cuAddresses[request.SgID]
 	hmi.Middleware.SendMessage(response, sgAddress)
 
 }
 
-// reads a message from the channel, processes it and sends a response
+// starts a udp server and waits for incoming messages
 func (hmi *HMI) HMI_comm_loop() int {
 
 	//Start local server to listen to incoming messages
@@ -74,6 +73,7 @@ func (hmi *HMI) HMI_comm_loop() int {
 	}
 }
 
+// Reads the cu address from the content field and adds it to the local cuAddresses variable
 func (hmi *HMI) RegisterCU(request types.Message) types.ReturnTuple {
 	addressAndPort := strings.Split(request.Content, ":")
 
@@ -83,7 +83,7 @@ func (hmi *HMI) RegisterCU(request types.Message) types.ReturnTuple {
 	}
 
 	ip := net.ParseIP(addressAndPort[0])
-	fmt.Println(ip)
+
 	hmi.cuAddresses[request.SgID] = net.UDPAddr{IP: ip, Port: port}
 
 	return types.ReturnTuple{Content: "", Code: types.ACCEPTED}
@@ -91,10 +91,6 @@ func (hmi *HMI) RegisterCU(request types.Message) types.ReturnTuple {
 
 // read contents, get user input, create new message
 func (hmi *HMI) handleMessage(request types.Message) types.Message {
-
-	// if hmi.SGAddresses[request.SgID] == nil && request.RpID != types.Register {
-	// 	return nil
-	// }
 
 	var returned types.ReturnTuple
 
@@ -111,7 +107,7 @@ func (hmi *HMI) handleMessage(request types.Message) types.Message {
 	case types.GetConfirmation:
 		hmi.GUIconnector.GetConfirmation(request.Content)
 		returned = hmi.GUIconnector.AwaitResponse()
-	case types.RemoteProcID(types.Register):
+	case types.Register:
 		returned = hmi.RegisterCU(request)
 	default:
 		//Respond with error code in case procedure ID does not exist

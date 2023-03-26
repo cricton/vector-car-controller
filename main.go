@@ -46,8 +46,8 @@ func main() {
 	//---------------------------Start Main Loops---------------------------------//
 
 	go sg0.Mainloop()
-	//go sg1.Mainloop()
-	//go sg2.Mainloop()
+	go sg1.Mainloop()
+	go sg2.Mainloop()
 
 	hmi.HMI_main_loop()
 
