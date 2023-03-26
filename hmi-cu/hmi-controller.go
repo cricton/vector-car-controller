@@ -1,4 +1,4 @@
-package hmisg
+package hmicu
 
 import (
 	"fmt"
