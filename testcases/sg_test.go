@@ -64,8 +64,8 @@ func TestIllegalRpID(t *testing.T) {
 		t.Errorf("Return code = %d; want %d", receivedAtSG.ReturnCode, types.ERROR)
 	}
 
-	if receivedAtSG.SgID != cu.ID {
-		t.Errorf("Client ID = %d; want %d", receivedAtSG.SgID, cu.ID)
+	if receivedAtSG.CuID != cu.ID {
+		t.Errorf("Client ID = %d; want %d", receivedAtSG.CuID, cu.ID)
 	}
 
 	if receivedAtSG.RpID != types.None {
@@ -131,8 +131,8 @@ func TestGetString(t *testing.T) {
 		t.Errorf("Return code = %d; want %d", receivedAtSG.ReturnCode, types.ERROR)
 	}
 
-	if receivedAtSG.SgID != cu.ID {
-		t.Errorf("Client ID = %d; want %d", receivedAtSG.SgID, cu.ID)
+	if receivedAtSG.CuID != cu.ID {
+		t.Errorf("Client ID = %d; want %d", receivedAtSG.CuID, cu.ID)
 	}
 
 	if receivedAtSG.RpID != types.None {
@@ -200,8 +200,8 @@ func TestGetConfirmation(t *testing.T) {
 		t.Errorf("Return code = %d; want %d", receivedAtSG.ReturnCode, accepted)
 	}
 
-	if receivedAtSG.SgID != cu.ID {
-		t.Errorf("Client ID = %d; want %d", receivedAtSG.SgID, cu.ID)
+	if receivedAtSG.CuID != cu.ID {
+		t.Errorf("Client ID = %d; want %d", receivedAtSG.CuID, cu.ID)
 	}
 
 	if receivedAtSG.RpID != types.None {
@@ -245,7 +245,7 @@ func TestGetInfo(t *testing.T) {
 
 	go hmi.HMI_comm_loop()
 
-	//--Register control unit--//
+	//--Register control
 	cu.Register()
 
 	cu.Middleware.SendMessage(message, cu.HMIAddress)
@@ -264,8 +264,8 @@ func TestGetInfo(t *testing.T) {
 		t.Errorf("Return code = %d; want %d", receivedAtSG.ReturnCode, types.INFO)
 	}
 
-	if receivedAtSG.SgID != cu.ID {
-		t.Errorf("Client ID = %d; want %d", receivedAtSG.SgID, cu.ID)
+	if receivedAtSG.CuID != cu.ID {
+		t.Errorf("Client ID = %d; want %d", receivedAtSG.CuID, cu.ID)
 	}
 
 	if receivedAtSG.RpID != types.None {

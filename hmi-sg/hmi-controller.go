@@ -55,7 +55,7 @@ func (hmi HMI) ReceiveMessage() types.Message {
 func (hmi *HMI) SendResponse(request types.Message) {
 
 	response := hmi.handleMessage(request)
-	sgAddress := hmi.cuAddresses[request.SgID]
+	sgAddress := hmi.cuAddresses[request.CuID]
 	hmi.Middleware.SendMessage(response, sgAddress)
 
 }
@@ -84,7 +84,7 @@ func (hmi *HMI) RegisterCU(request types.Message) types.ReturnTuple {
 
 	ip := net.ParseIP(addressAndPort[0])
 
-	hmi.cuAddresses[request.SgID] = net.UDPAddr{IP: ip, Port: port}
+	hmi.cuAddresses[request.CuID] = net.UDPAddr{IP: ip, Port: port}
 
 	return types.ReturnTuple{Content: "", Code: types.ACCEPTED}
 }
@@ -119,7 +119,7 @@ func (hmi *HMI) handleMessage(request types.Message) types.Message {
 	//construct response message
 	response := types.Message{
 		Type:       types.Response,
-		SgID:       request.SgID,
+		CuID:       request.CuID,
 		Content:    returned.Content,
 		ReturnCode: returned.Code}
 

@@ -2,7 +2,7 @@ package types
 
 type Message struct {
 	Type       MessageType
-	SgID       uint8
+	CuID       uint8
 	RpID       RemoteProcID
 	ReturnCode ReturnType
 	Content    string

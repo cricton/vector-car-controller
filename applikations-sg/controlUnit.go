@@ -42,7 +42,7 @@ func (cu ControlUnit) Mainloop() {
 
 func (cu ControlUnit) Register() {
 	registerMessage := types.Message{
-		SgID:    cu.ID,
+		CuID:    cu.ID,
 		RpID:    types.Register,
 		Content: cu.LocalAddress.String(),
 	}
@@ -63,7 +63,7 @@ func (cu ControlUnit) constructRandomMessage() types.Message {
 	request := cu.requests[rand.Intn(len(cu.requests))]
 
 	requestMessage := types.Message{
-		SgID:    cu.ID,
+		CuID:    cu.ID,
 		RpID:    request.RpID,
 		Content: request.Content,
 	}
