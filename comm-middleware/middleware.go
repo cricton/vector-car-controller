@@ -81,3 +81,17 @@ func (middleware Middleware) ReceiveMessage() types.Message {
 
 	return response
 }
+
+// Non-blocking call to receive the next incoming message
+func (middleware Middleware) ReceiveMessageAsync() types.Message {
+
+	select {
+	case response := <-middleware.IncomingChannel:
+		return response
+	default:
+		// receiving from middleware.IncomingChannel would block
+	}
+
+	//Return empty message
+	return types.Message{}
+}

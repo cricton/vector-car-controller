@@ -55,7 +55,7 @@ func (hmi HMI) ReceiveMessage() types.Message {
 func (hmi *HMI) SendResponse(request types.Message) {
 
 	response := hmi.handleMessage(request)
-	sgAddress := hmi.cuAddresses[request.CuID]
+	sgAddress := hmi.cuAddresses[request.ControlUnitID]
 	hmi.Middleware.SendMessage(response, sgAddress)
 
 }
@@ -84,7 +84,7 @@ func (hmi *HMI) RegisterCU(request types.Message) types.ReturnTuple {
 
 	ip := net.ParseIP(addressAndPort[0])
 
-	hmi.cuAddresses[request.CuID] = net.UDPAddr{IP: ip, Port: port}
+	hmi.cuAddresses[request.ControlUnitID] = net.UDPAddr{IP: ip, Port: port}
 
 	return types.ReturnTuple{Content: "", Code: types.ACCEPTED}
 }
@@ -95,7 +95,7 @@ func (hmi *HMI) handleMessage(request types.Message) types.Message {
 	var returned types.ReturnTuple
 
 	//switch depending on remote procedure ID
-	switch request.RpID {
+	switch request.RemoteProcedureID {
 	case types.Info:
 		hmi.GUIconnector.ShowInfo(request.Content)
 		returned = hmi.GUIconnector.AwaitResponse()
@@ -118,10 +118,11 @@ func (hmi *HMI) handleMessage(request types.Message) types.Message {
 
 	//construct response message
 	response := types.Message{
-		Type:       types.Response,
-		CuID:       request.CuID,
-		Content:    returned.Content,
-		ReturnCode: returned.Code}
+		Type:          types.Response,
+		RequestID:     request.RequestID,
+		ControlUnitID: request.ControlUnitID,
+		Content:       returned.Content,
+		ReturnCode:    returned.Code}
 
 	return response
 }

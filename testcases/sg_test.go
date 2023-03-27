@@ -6,13 +6,13 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2/test"
-	applikationssg "github.com/cricton/applikations-sg"
+	applicationcu "github.com/cricton/application-cu"
 	commmiddleware "github.com/cricton/comm-middleware"
-	hmisg "github.com/cricton/hmi-sg"
+	hmicu "github.com/cricton/hmi-cu"
 	types "github.com/cricton/types"
 )
 
-func TestIllegalRpID(t *testing.T) {
+func TestIllegalRemoteProcedureID(t *testing.T) {
 
 	//---------------------------Setup variables---------------------------------//
 
@@ -20,7 +20,7 @@ func TestIllegalRpID(t *testing.T) {
 	HMIAddr := net.UDPAddr{IP: ip, Port: 8082}
 	CUAddr := net.UDPAddr{IP: ip, Port: 8083}
 
-	cu := &applikationssg.ControlUnit{
+	cu := &applicationcu.ControlUnit{
 		Name:         "Airbag Control Unit",
 		ID:           0,
 		LocalAddress: CUAddr,
@@ -28,12 +28,12 @@ func TestIllegalRpID(t *testing.T) {
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
 	request := types.Message{
-		Type:    types.Request,
-		RpID:    255, //non existant RpID
-		Content: "Idle too long. Deactivate Airbag?",
+		Type:              types.Request,
+		RemoteProcedureID: 255, //non existant RemoteProcedureID
+		Content:           "Idle too long. Deactivate Airbag?",
 	}
 
-	hmi := hmisg.HMI{
+	hmi := hmicu.HMI{
 		LocalAddress: HMIAddr,
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
@@ -64,12 +64,12 @@ func TestIllegalRpID(t *testing.T) {
 		t.Errorf("Return code = %d; want %d", receivedAtSG.ReturnCode, types.ERROR)
 	}
 
-	if receivedAtSG.CuID != cu.ID {
-		t.Errorf("Client ID = %d; want %d", receivedAtSG.CuID, cu.ID)
+	if receivedAtSG.ControlUnitID != cu.ID {
+		t.Errorf("Client ID = %d; want %d", receivedAtSG.ControlUnitID, cu.ID)
 	}
 
-	if receivedAtSG.RpID != types.None {
-		t.Errorf("Remote procedure= %d; want %d", receivedAtSG.RpID, types.NONE)
+	if receivedAtSG.RemoteProcedureID != types.None {
+		t.Errorf("Remote procedure= %d; want %d", receivedAtSG.RemoteProcedureID, types.NONE)
 	}
 
 }
@@ -82,7 +82,7 @@ func TestGetString(t *testing.T) {
 	HMIAddr := net.UDPAddr{IP: ip, Port: 8080}
 	CUAddr := net.UDPAddr{IP: ip, Port: 8081}
 
-	cu := &applikationssg.ControlUnit{
+	cu := &applicationcu.ControlUnit{
 		Name:         "Airbag Control Unit",
 		ID:           0,
 		LocalAddress: CUAddr,
@@ -91,13 +91,13 @@ func TestGetString(t *testing.T) {
 	}
 
 	message := types.Message{
-		Type:    types.Request,
-		RpID:    types.GetString,
-		Content: "Hello ...",
+		Type:              types.Request,
+		RemoteProcedureID: types.GetString,
+		Content:           "Hello ...",
 	}
 	go cu.Middleware.StartUDPServer(cu.LocalAddress)
 
-	hmi := hmisg.HMI{
+	hmi := hmicu.HMI{
 		LocalAddress: HMIAddr,
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
@@ -131,12 +131,12 @@ func TestGetString(t *testing.T) {
 		t.Errorf("Return code = %d; want %d", receivedAtSG.ReturnCode, types.ERROR)
 	}
 
-	if receivedAtSG.CuID != cu.ID {
-		t.Errorf("Client ID = %d; want %d", receivedAtSG.CuID, cu.ID)
+	if receivedAtSG.ControlUnitID != cu.ID {
+		t.Errorf("Client ID = %d; want %d", receivedAtSG.ControlUnitID, cu.ID)
 	}
 
-	if receivedAtSG.RpID != types.None {
-		t.Errorf("Remote procedure= %d; want %d", receivedAtSG.RpID, types.NONE)
+	if receivedAtSG.RemoteProcedureID != types.None {
+		t.Errorf("Remote procedure= %d; want %d", receivedAtSG.RemoteProcedureID, types.NONE)
 	}
 }
 
@@ -148,7 +148,7 @@ func TestGetConfirmation(t *testing.T) {
 	HMIAddr := net.UDPAddr{IP: ip, Port: 8084}
 	CUAddr := net.UDPAddr{IP: ip, Port: 8085}
 
-	cu := &applikationssg.ControlUnit{
+	cu := &applicationcu.ControlUnit{
 		Name:         "Airbag Control Unit",
 		ID:           0,
 		LocalAddress: CUAddr,
@@ -157,12 +157,12 @@ func TestGetConfirmation(t *testing.T) {
 	}
 
 	message := types.Message{
-		Type:    types.Request,
-		RpID:    types.GetConfirmation,
-		Content: "Hello?",
+		Type:              types.Request,
+		RemoteProcedureID: types.GetConfirmation,
+		Content:           "Hello?",
 	}
 
-	hmi := hmisg.HMI{
+	hmi := hmicu.HMI{
 		LocalAddress: HMIAddr,
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
@@ -200,12 +200,12 @@ func TestGetConfirmation(t *testing.T) {
 		t.Errorf("Return code = %d; want %d", receivedAtSG.ReturnCode, accepted)
 	}
 
-	if receivedAtSG.CuID != cu.ID {
-		t.Errorf("Client ID = %d; want %d", receivedAtSG.CuID, cu.ID)
+	if receivedAtSG.ControlUnitID != cu.ID {
+		t.Errorf("Client ID = %d; want %d", receivedAtSG.ControlUnitID, cu.ID)
 	}
 
-	if receivedAtSG.RpID != types.None {
-		t.Errorf("Remote procedure= %d; want %d", receivedAtSG.RpID, types.NONE)
+	if receivedAtSG.RemoteProcedureID != types.None {
+		t.Errorf("Remote procedure= %d; want %d", receivedAtSG.RemoteProcedureID, types.NONE)
 	}
 
 }
@@ -218,7 +218,7 @@ func TestGetInfo(t *testing.T) {
 	HMIAddr := net.UDPAddr{IP: ip, Port: 8086}
 	CUAddr := net.UDPAddr{IP: ip, Port: 8087}
 
-	cu := &applikationssg.ControlUnit{
+	cu := &applicationcu.ControlUnit{
 		Name:         "Airbag Control Unit",
 		ID:           0,
 		LocalAddress: CUAddr,
@@ -227,12 +227,12 @@ func TestGetInfo(t *testing.T) {
 	}
 
 	message := types.Message{
-		Type:    types.Request,
-		RpID:    types.Info,
-		Content: "Hello!",
+		Type:              types.Request,
+		RemoteProcedureID: types.Info,
+		Content:           "Hello!",
 	}
 
-	hmi := hmisg.HMI{
+	hmi := hmicu.HMI{
 		LocalAddress: HMIAddr,
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
@@ -264,11 +264,11 @@ func TestGetInfo(t *testing.T) {
 		t.Errorf("Return code = %d; want %d", receivedAtSG.ReturnCode, types.INFO)
 	}
 
-	if receivedAtSG.CuID != cu.ID {
-		t.Errorf("Client ID = %d; want %d", receivedAtSG.CuID, cu.ID)
+	if receivedAtSG.ControlUnitID != cu.ID {
+		t.Errorf("Client ID = %d; want %d", receivedAtSG.ControlUnitID, cu.ID)
 	}
 
-	if receivedAtSG.RpID != types.None {
-		t.Errorf("Remote procedure= %d; want %d", receivedAtSG.RpID, types.NONE)
+	if receivedAtSG.RemoteProcedureID != types.None {
+		t.Errorf("Remote procedure= %d; want %d", receivedAtSG.RemoteProcedureID, types.NONE)
 	}
 }

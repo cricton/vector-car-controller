@@ -18,9 +18,9 @@ func main() {
 		HMIAddress:   types.HMIAddr,
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
-	cu0.AddRequest(types.RequestMsg{RpID: types.GetConfirmation, Content: "Idle too long, disable Airbag?"})
-	cu0.AddRequest(types.RequestMsg{RpID: types.Info, Content: "Airbag malfunctioning."})
-	cu0.AddRequest(types.RequestMsg{RpID: types.GetConfirmation, Content: "Fault detected. Restart Airbag system?"})
+	cu0.AddRequest(types.RequestMsg{RemoteProcedureID: types.GetConfirmation, Content: "Idle too long, disable Airbag?"})
+	cu0.AddRequest(types.RequestMsg{RemoteProcedureID: types.Info, Content: "Airbag malfunctioning."})
+	cu0.AddRequest(types.RequestMsg{RemoteProcedureID: types.GetConfirmation, Content: "Fault detected. Restart Airbag system?"})
 
 	cu1 := &applicationcu.ControlUnit{
 		Name:         "Infotainment Control Unit",
@@ -29,9 +29,9 @@ func main() {
 		HMIAddress:   types.HMIAddr,
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
-	cu1.AddRequest(types.RequestMsg{RpID: types.GetConfirmation, Content: "New shows available. Update Infotainment system?"})
-	cu1.AddRequest(types.RequestMsg{RpID: types.Info, Content: "Download completed."})
-	cu1.AddRequest(types.RequestMsg{RpID: types.GetConfirmation, Content: "Out of disk space. Archive unused files?"})
+	cu1.AddRequest(types.RequestMsg{RemoteProcedureID: types.GetConfirmation, Content: "New shows available. Update Infotainment system?"})
+	cu1.AddRequest(types.RequestMsg{RemoteProcedureID: types.Info, Content: "Download completed."})
+	cu1.AddRequest(types.RequestMsg{RemoteProcedureID: types.GetConfirmation, Content: "Out of disk space. Archive unused files?"})
 
 	cu2 := &applicationcu.ControlUnit{
 		Name:         "Navigation Control Unit",
@@ -40,9 +40,9 @@ func main() {
 		HMIAddress:   types.HMIAddr,
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
-	cu2.AddRequest(types.RequestMsg{RpID: types.GetString, Content: "Enter new destination..."})
-	cu2.AddRequest(types.RequestMsg{RpID: types.GetString, Content: "Enter home address..."})
-	cu2.AddRequest(types.RequestMsg{RpID: types.Info, Content: "GPS signal lost."})
+	cu2.AddRequest(types.RequestMsg{RemoteProcedureID: types.GetString, Content: "Enter new destination..."})
+	cu2.AddRequest(types.RequestMsg{RemoteProcedureID: types.GetString, Content: "Enter home address..."})
+	cu2.AddRequest(types.RequestMsg{RemoteProcedureID: types.Info, Content: "GPS signal lost."})
 
 	hmi := hmicu.HMI{
 		LocalAddress: types.HMIAddr,

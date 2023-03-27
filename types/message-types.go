@@ -1,11 +1,12 @@
 package types
 
 type Message struct {
-	Type       MessageType
-	CuID       uint8
-	RpID       RemoteProcID
-	ReturnCode ReturnType
-	Content    string
+	Type              MessageType
+	ControlUnitID     uint8
+	RemoteProcedureID RemoteProcID
+	RequestID         uint8
+	ReturnCode        ReturnType
+	Content           string
 }
 
 type ReturnType uint8
@@ -43,6 +44,13 @@ const (
 )
 
 type RequestMsg struct {
-	RpID    RemoteProcID
-	Content string
+	RemoteProcedureID RemoteProcID
+	Content           string
 }
+
+type RequestStatus uint8
+
+const (
+	Free    RequestStatus = 0
+	Pending RequestStatus = 1
+)
