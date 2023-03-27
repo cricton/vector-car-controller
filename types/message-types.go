@@ -54,3 +54,5 @@ const (
 	Free    RequestStatus = 0
 	Pending RequestStatus = 1
 )
+
+const MaxConcurrentResponses = 8

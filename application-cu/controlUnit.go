@@ -19,7 +19,8 @@ type ControlUnit struct {
 	HMIAddress       net.UDPAddr
 	Middleware       *commmiddleware.Middleware
 	requests         []types.RequestMsg
-	pendingResponses [8]types.RequestStatus
+	pendingResponses [types.MaxConcurrentResponses]types.RequestStatus
+	queuedResponses  uint8
 }
 
 func (cu *ControlUnit) getNewRequestID() uint8 {
@@ -32,7 +33,7 @@ func (cu *ControlUnit) getNewRequestID() uint8 {
 	}
 
 	cu.pendingResponses[requestID] = types.Pending
-	fmt.Println(cu.pendingResponses)
+	cu.queuedResponses += 1
 	return requestID
 }
 
@@ -42,10 +43,13 @@ func (cu *ControlUnit) clearRequestID(requestID uint8) {
 
 func (cu *ControlUnit) sendMessagePeriodically(minTime int, maxTime int) {
 	for {
-		request := cu.getRandomRequest()
-		cu.sendMessage(request)
+		if cu.queuedResponses < types.MaxConcurrentResponses {
+			request := cu.getRandomRequest()
+			cu.sendMessage(request)
+		} else {
+			fmt.Println("Max concurrent messages sent")
+		}
 		time.Sleep(time.Duration(rand.Intn(maxTime)+minTime) * time.Second)
-
 	}
 
 }
@@ -69,6 +73,7 @@ func (cu *ControlUnit) receiveMessageAsync() types.Message {
 	}
 
 	cu.clearRequestID(message.RequestID)
+	cu.queuedResponses -= 1
 	return message
 }
 
