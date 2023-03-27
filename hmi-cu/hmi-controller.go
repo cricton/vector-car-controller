@@ -22,7 +22,7 @@ type HMI struct {
 
 func (hmi *HMI) PrepareGUI() fyne.Window {
 	application := app.New()
-	mainWindow := application.NewWindow("MHI Module")
+	mainWindow := application.NewWindow("HMI Module")
 	hmi.GUIconnector = GUI{MainWindow: mainWindow}
 	hmi.GUIconnector.ResponseChannel = make(chan types.ReturnTuple)
 	hmi.GUIconnector.SetupGUI()
