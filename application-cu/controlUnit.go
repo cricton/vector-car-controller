@@ -19,7 +19,7 @@ type ControlUnit struct {
 	HMIAddress       net.UDPAddr
 	Middleware       *commmiddleware.Middleware
 	requests         []types.RequestMsg
-	pendingResponses [types.MaxConcurrentResponses]types.RequestStatus
+	pendingResponses [types.MaxQueuedResponses]types.RequestStatus
 	queuedResponses  uint8
 }
 
@@ -43,7 +43,7 @@ func (cu *ControlUnit) clearRequestID(requestID uint8) {
 
 func (cu *ControlUnit) sendMessagePeriodically(minTime int, maxTime int) {
 	for {
-		if cu.queuedResponses < types.MaxConcurrentResponses {
+		if cu.queuedResponses < types.MaxQueuedResponses {
 			request := cu.getRandomRequest()
 			cu.sendMessage(request)
 		} else {

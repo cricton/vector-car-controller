@@ -55,4 +55,4 @@ const (
 	Pending RequestStatus = 1
 )
 
-const MaxConcurrentResponses = 8
+const MaxQueuedResponses = 8
