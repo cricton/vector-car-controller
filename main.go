@@ -48,6 +48,7 @@ func main() {
 		LocalAddress: types.HMIAddr,
 		Middleware:   &commmiddleware.Middleware{IncomingChannel: make(chan types.Message)},
 	}
+
 	//---------------------------Start Main Loops---------------------------------//
 
 	go cu0.Mainloop()
