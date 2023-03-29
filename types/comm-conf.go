@@ -12,3 +12,5 @@ const (
 	CU1ID = 1
 	CU2ID = 2
 )
+
+const MaxQueuedResponses = 8

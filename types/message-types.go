@@ -54,5 +54,3 @@ const (
 	Free    RequestStatus = 0
 	Pending RequestStatus = 1
 )
-
-const MaxQueuedResponses = 8

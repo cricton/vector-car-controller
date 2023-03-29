@@ -55,6 +55,6 @@ func main() {
 	go cu1.Mainloop()
 	go cu2.Mainloop()
 
-	hmi.HMI_main_loop()
+	hmi.Mainloop()
 
 }

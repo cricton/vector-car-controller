@@ -2,6 +2,8 @@ module github.com/cricton
 
 go 1.20
 
+require github.com/google/uuid v1.3.0
+
 require (
 	fyne.io/fyne v1.4.3 // indirect
 	fyne.io/fyne/v2 v2.3.2 // indirect

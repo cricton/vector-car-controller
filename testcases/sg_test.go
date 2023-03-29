@@ -106,7 +106,7 @@ func TestGetString(t *testing.T) {
 
 	hmi.PrepareGUI()
 
-	go hmi.HMI_comm_loop()
+	go hmi.Commloop()
 
 	//--Register control unit--//
 	cu.Register()
@@ -172,7 +172,7 @@ func TestGetConfirmation(t *testing.T) {
 	go cu.Middleware.StartUDPServer(cu.LocalAddress)
 	hmi.PrepareGUI()
 
-	go hmi.HMI_comm_loop()
+	go hmi.Commloop()
 
 	//--Register control unit--//
 	cu.Register()
@@ -243,7 +243,7 @@ func TestGetInfo(t *testing.T) {
 
 	hmi.PrepareGUI()
 
-	go hmi.HMI_comm_loop()
+	go hmi.Commloop()
 
 	//--Register control
 	cu.Register()

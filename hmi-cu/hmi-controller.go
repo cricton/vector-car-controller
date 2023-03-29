@@ -30,13 +30,13 @@ func (hmi *HMI) PrepareGUI() fyne.Window {
 	return mainWindow
 }
 
-func (hmi *HMI) HMI_main_loop() {
+func (hmi *HMI) Mainloop() {
 	fmt.Println("Starting HMI module...")
 
 	mainWindow := hmi.PrepareGUI()
 
 	//Start communication coroutine
-	go hmi.HMI_comm_loop()
+	go hmi.Commloop()
 
 	//Start GUI loop
 	mainWindow.ShowAndRun()
@@ -55,13 +55,13 @@ func (hmi HMI) ReceiveMessage() types.Message {
 func (hmi *HMI) SendResponse(request types.Message) {
 
 	response := hmi.handleMessage(request)
-	sgAddress := hmi.cuAddresses[request.ControlUnitID]
-	hmi.Middleware.SendMessage(response, sgAddress)
+	cuAddress := hmi.cuAddresses[request.ControlUnitID]
+	hmi.Middleware.SendMessage(response, cuAddress)
 
 }
 
 // Starts a udp server and waits for incoming messages
-func (hmi *HMI) HMI_comm_loop() int {
+func (hmi *HMI) Commloop() int {
 
 	//Start local server to listen to incoming messages
 	go hmi.Middleware.StartUDPServer(hmi.LocalAddress)

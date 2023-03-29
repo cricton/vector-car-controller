@@ -20,7 +20,7 @@ type ControlUnit struct {
 	Middleware       *commmiddleware.Middleware
 	requests         []types.RequestMsg
 	pendingResponses [types.MaxQueuedResponses]types.RequestStatus
-	queuedResponses  uint8
+	queuedRequests   uint8
 }
 
 func (cu *ControlUnit) getNewRequestID() uint8 {
@@ -33,17 +33,17 @@ func (cu *ControlUnit) getNewRequestID() uint8 {
 	}
 
 	cu.pendingResponses[requestID] = types.Pending
-	cu.queuedResponses += 1
+	cu.queuedRequests += 1
 	return requestID
 }
 
-func (cu *ControlUnit) clearRequestID(requestID uint8) {
+func (cu *ControlUnit) removeFromPending(requestID uint8) {
 	cu.pendingResponses[requestID] = types.Free
 }
 
 func (cu *ControlUnit) sendMessagePeriodically(minTime int, maxTime int) {
 	for {
-		if cu.queuedResponses < types.MaxQueuedResponses {
+		if cu.queuedRequests < types.MaxQueuedResponses {
 			request := cu.getRandomRequest()
 			cu.sendMessage(request)
 		} else {
@@ -72,8 +72,9 @@ func (cu *ControlUnit) receiveMessageAsync() types.Message {
 		return message
 	}
 
-	cu.clearRequestID(message.RequestID)
-	cu.queuedResponses -= 1
+	//TODO integer
+	cu.removeFromPending(message.RequestID)
+	cu.queuedRequests -= 1
 	return message
 }
 
@@ -121,14 +122,12 @@ func (cu *ControlUnit) Mainloop() {
 	//send registration message to HMI
 	cu.Register()
 
-	go cu.sendMessagePeriodically(10, 10)
+	go cu.sendMessagePeriodically(20, 50)
 
 	for {
-
 		response := cu.receiveMessageAsync()
 		if (response != types.Message{}) {
 			fmt.Println("Received response: ", response)
 		}
-
 	}
 }
