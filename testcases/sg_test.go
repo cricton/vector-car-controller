@@ -44,8 +44,6 @@ func TestIllegalRemoteProcedureID(t *testing.T) {
 	go cu.Middleware.StartUDPServer(CUAddr)
 	go hmi.Middleware.StartUDPServer(HMIAddr)
 
-	//--Register control unit--//
-	go cu.Register()
 	receivedAtHmi := hmi.ReceiveMessage()
 	hmi.SendResponse(receivedAtHmi)
 
@@ -64,8 +62,8 @@ func TestIllegalRemoteProcedureID(t *testing.T) {
 		t.Errorf("Return code = %d; want %d", receivedAtSG.ReturnCode, types.ERROR)
 	}
 
-	if receivedAtSG.ControlUnitID != cu.ID {
-		t.Errorf("Client ID = %d; want %d", receivedAtSG.ControlUnitID, cu.ID)
+	if receivedAtSG.ControlUnitName != cu.Name {
+		t.Errorf("Client ID = %s; want %s", receivedAtSG.ControlUnitName, cu.Name)
 	}
 
 	if receivedAtSG.RemoteProcedureID != types.None {
@@ -108,9 +106,6 @@ func TestGetString(t *testing.T) {
 
 	go hmi.Commloop()
 
-	//--Register control unit--//
-	cu.Register()
-
 	cu.Middleware.SendMessage(message, cu.HMIAddress)
 
 	enterButton := hmi.GUIconnector.GetEnterButton()
@@ -131,8 +126,8 @@ func TestGetString(t *testing.T) {
 		t.Errorf("Return code = %d; want %d", receivedAtSG.ReturnCode, types.ERROR)
 	}
 
-	if receivedAtSG.ControlUnitID != cu.ID {
-		t.Errorf("Client ID = %d; want %d", receivedAtSG.ControlUnitID, cu.ID)
+	if receivedAtSG.ControlUnitName != cu.Name {
+		t.Errorf("Client ID = %s; want %s", receivedAtSG.ControlUnitName, cu.Name)
 	}
 
 	if receivedAtSG.RemoteProcedureID != types.None {
@@ -174,9 +169,6 @@ func TestGetConfirmation(t *testing.T) {
 
 	go hmi.Commloop()
 
-	//--Register control unit--//
-	cu.Register()
-
 	cu.Middleware.SendMessage(message, cu.HMIAddress)
 
 	var accepted types.ReturnType
@@ -200,8 +192,8 @@ func TestGetConfirmation(t *testing.T) {
 		t.Errorf("Return code = %d; want %d", receivedAtSG.ReturnCode, accepted)
 	}
 
-	if receivedAtSG.ControlUnitID != cu.ID {
-		t.Errorf("Client ID = %d; want %d", receivedAtSG.ControlUnitID, cu.ID)
+	if receivedAtSG.ControlUnitName != cu.Name {
+		t.Errorf("Client ID = %s; want %s", receivedAtSG.ControlUnitName, cu.Name)
 	}
 
 	if receivedAtSG.RemoteProcedureID != types.None {
@@ -245,9 +237,6 @@ func TestGetInfo(t *testing.T) {
 
 	go hmi.Commloop()
 
-	//--Register control
-	cu.Register()
-
 	cu.Middleware.SendMessage(message, cu.HMIAddress)
 
 	hmi.GUIconnector.ResponseChannel <- types.ReturnTuple{Content: "", Code: types.INFO}
@@ -264,8 +253,8 @@ func TestGetInfo(t *testing.T) {
 		t.Errorf("Return code = %d; want %d", receivedAtSG.ReturnCode, types.INFO)
 	}
 
-	if receivedAtSG.ControlUnitID != cu.ID {
-		t.Errorf("Client ID = %d; want %d", receivedAtSG.ControlUnitID, cu.ID)
+	if receivedAtSG.ControlUnitName != cu.Name {
+		t.Errorf("Client ID = %s; want %s", receivedAtSG.ControlUnitName, cu.Name)
 	}
 
 	if receivedAtSG.RemoteProcedureID != types.None {

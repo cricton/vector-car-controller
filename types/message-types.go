@@ -1,13 +1,18 @@
 package types
 
-import "github.com/google/uuid"
+import (
+	"net"
+
+	"github.com/google/uuid"
+)
 
 type Message struct {
 	Type              MessageType
-	ControlUnitID     uint8
+	ControlUnitName   string
 	RemoteProcedureID RemoteProcID
 	RequestID         uuid.UUID
 	ReturnCode        ReturnType
+	Address           net.UDPAddr
 	Content           string
 }
 
@@ -42,7 +47,6 @@ const (
 	GetString       RemoteProcID = 1
 	GetConfirmation RemoteProcID = 2
 	Info            RemoteProcID = 3
-	Register        RemoteProcID = 4
 )
 
 type RequestMsg struct {

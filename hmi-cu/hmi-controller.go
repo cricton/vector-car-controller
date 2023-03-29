@@ -2,10 +2,7 @@ package hmicu
 
 import (
 	"fmt"
-	"log"
 	"net"
-	"strconv"
-	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -15,7 +12,6 @@ import (
 
 type HMI struct {
 	LocalAddress net.UDPAddr
-	cuAddresses  [16]net.UDPAddr
 	Middleware   *commmiddleware.Middleware
 	GUIconnector GUI
 }
@@ -55,8 +51,7 @@ func (hmi HMI) ReceiveMessage() types.Message {
 func (hmi *HMI) SendResponse(request types.Message) {
 
 	response := hmi.handleMessage(request)
-	cuAddress := hmi.cuAddresses[request.ControlUnitID]
-	hmi.Middleware.SendMessage(response, cuAddress)
+	hmi.Middleware.SendMessage(response, request.Address)
 
 }
 
@@ -71,22 +66,6 @@ func (hmi *HMI) Commloop() int {
 
 		hmi.SendResponse(message)
 	}
-}
-
-// Reads the cu address from the content field and adds it to the local cuAddresses variable
-func (hmi *HMI) RegisterCU(request types.Message) types.ReturnTuple {
-	addressAndPort := strings.Split(request.Content, ":")
-
-	port, err := strconv.Atoi(addressAndPort[1])
-	if err != nil {
-		log.Fatal("Illegal address port")
-	}
-
-	ip := net.ParseIP(addressAndPort[0])
-
-	hmi.cuAddresses[request.ControlUnitID] = net.UDPAddr{IP: ip, Port: port}
-
-	return types.ReturnTuple{Content: "", Code: types.ACCEPTED}
 }
 
 // Read contents, get user input, create new message
@@ -108,9 +87,6 @@ func (hmi *HMI) handleMessage(request types.Message) types.Message {
 		hmi.GUIconnector.GetConfirmation(request.Content)
 		returned = hmi.GUIconnector.AwaitResponse()
 
-	case types.Register:
-		returned = hmi.RegisterCU(request)
-
 	default:
 		//Respond with error code in case procedure ID does not exist
 		returned = types.ReturnTuple{Content: "", Code: types.ERROR}
@@ -118,15 +94,12 @@ func (hmi *HMI) handleMessage(request types.Message) types.Message {
 
 	//construct response message
 	response := types.Message{
-		Type:          types.Response,
-		RequestID:     request.RequestID,
-		ControlUnitID: request.ControlUnitID,
-		Content:       returned.Content,
-		ReturnCode:    returned.Code}
+		Type:            types.Response,
+		RequestID:       request.RequestID,
+		ControlUnitName: request.ControlUnitName,
+		Content:         returned.Content,
+		ReturnCode:      returned.Code,
+		Address:         hmi.LocalAddress}
 
 	return response
-}
-
-func (hmi HMI) GetcuAddresses() [16]net.UDPAddr {
-	return hmi.cuAddresses
 }

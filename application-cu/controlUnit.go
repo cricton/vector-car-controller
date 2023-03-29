@@ -40,42 +40,26 @@ func (cu *ControlUnit) sendMessage(request types.RequestMsg) {
 
 	message := types.Message{
 		Type:              types.Request,
-		ControlUnitID:     cu.ID,
+		ControlUnitName:   cu.Name,
 		RequestID:         uuid.New(),
 		Content:           request.Content,
 		RemoteProcedureID: request.RemoteProcedureID,
+		Address:           cu.LocalAddress,
 	}
 
 	cu.activeRequests += 1
 	cu.Middleware.SendMessage(message, cu.HMIAddress)
 }
 
-func (cu *ControlUnit) receiveMessageAsync() types.Message {
-	message := cu.Middleware.ReceiveMessageAsync()
-	if (message == types.Message{}) {
-		return message
+func (cu *ControlUnit) receiveMessageAsync() (types.Message, bool) {
+	message, received := cu.Middleware.ReceiveMessageAsync()
+
+	if received {
+		cu.activeRequests -= 1
+		return message, true
 	}
 
-	cu.activeRequests -= 1
-	return message
-}
-
-func (cu ControlUnit) Register() {
-	//wait for HMI UDP Server to boot up
-	time.Sleep(time.Second)
-
-	registerMessage := types.Message{
-		ControlUnitID:     cu.ID,
-		RemoteProcedureID: types.Register,
-		Content:           cu.LocalAddress.String(),
-	}
-	cu.Middleware.SendMessage(registerMessage, cu.HMIAddress)
-
-	response := cu.Middleware.ReceiveMessage()
-
-	if response.ReturnCode != types.ACCEPTED {
-		log.Fatal("Could not register Control Unit ", cu.ID)
-	}
+	return message, false
 }
 
 func (cu ControlUnit) getRandomRequest() types.RequestMsg {
@@ -101,14 +85,11 @@ func (cu *ControlUnit) Mainloop() {
 	fmt.Println("Starting ", cu.Name)
 	go cu.Middleware.StartUDPServer(cu.LocalAddress)
 
-	//send registration message to HMI
-	cu.Register()
-
 	go cu.sendMessagePeriodically(20, 50)
 
 	for {
-		response := cu.receiveMessageAsync()
-		if (response != types.Message{}) {
+		response, received := cu.receiveMessageAsync()
+		if received {
 			fmt.Println("Received response: ", response)
 		}
 	}
