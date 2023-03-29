@@ -25,9 +25,9 @@ type GUI struct {
 	enterButton *widget.Button
 }
 
-func (gui GUI) GetConfirmation(request string) {
+func (gui GUI) GetConfirmation(requestor string, request string) {
 
-	d := dialog.NewConfirm("Please confirm!", request,
+	d := dialog.NewConfirm(requestor, request,
 		func(b bool) {
 			if b {
 				gui.ResponseChannel <- types.ReturnTuple{Content: "", Code: types.ACCEPTED}
@@ -39,8 +39,8 @@ func (gui GUI) GetConfirmation(request string) {
 
 }
 
-func (gui GUI) ShowInfo(request string) {
-	d := dialog.NewInformation("Info!", request, gui.MainWindow)
+func (gui GUI) ShowInfo(requestor string, request string) {
+	d := dialog.NewInformation(requestor, request, gui.MainWindow)
 
 	d.SetOnClosed(func() {
 		gui.ResponseChannel <- types.ReturnTuple{Content: "", Code: types.INFO}
@@ -58,8 +58,12 @@ func (gui *GUI) AwaitResponse() types.ReturnTuple {
 }
 
 // Displays a text prompt for the user to respond to
-func (gui GUI) GetString(request string) {
-	gui.RequestLabel.SetText(request)
+func (gui GUI) GetString(requestor string, request string) {
+	var strBuilder strings.Builder
+	strBuilder.Write([]byte(requestor))
+	strBuilder.Write([]byte(": "))
+	strBuilder.Write([]byte(request))
+	gui.RequestLabel.SetText(strBuilder.String())
 }
 
 func (gui *GUI) makeKeyboardRows() (*fyne.Container, *fyne.Container, *fyne.Container) {

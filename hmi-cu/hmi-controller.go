@@ -76,15 +76,15 @@ func (hmi *HMI) handleMessage(request types.Message) types.Message {
 	//switch depending on remote procedure ID
 	switch request.RemoteProcedureID {
 	case types.Info:
-		hmi.GUIconnector.ShowInfo(request.Content)
+		hmi.GUIconnector.ShowInfo(request.ControlUnitName, request.Content)
 		returned = hmi.GUIconnector.AwaitResponse()
 
 	case types.GetString:
-		hmi.GUIconnector.GetString(request.Content)
+		hmi.GUIconnector.GetString(request.ControlUnitName, request.Content)
 		returned = hmi.GUIconnector.AwaitResponse()
 
 	case types.GetConfirmation:
-		hmi.GUIconnector.GetConfirmation(request.Content)
+		hmi.GUIconnector.GetConfirmation(request.ControlUnitName, request.Content)
 		returned = hmi.GUIconnector.AwaitResponse()
 
 	default:
