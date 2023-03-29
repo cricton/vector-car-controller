@@ -1,10 +1,12 @@
 package types
 
+import "github.com/google/uuid"
+
 type Message struct {
 	Type              MessageType
 	ControlUnitID     uint8
 	RemoteProcedureID RemoteProcID
-	RequestID         uint8
+	RequestID         uuid.UUID
 	ReturnCode        ReturnType
 	Content           string
 }

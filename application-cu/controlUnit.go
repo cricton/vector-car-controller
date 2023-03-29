@@ -9,41 +9,23 @@ import (
 
 	commmiddleware "github.com/cricton/comm-middleware"
 	"github.com/cricton/types"
+	"github.com/google/uuid"
 )
 
 // Create cu struct using composition
 type ControlUnit struct {
-	Name             string
-	ID               uint8
-	LocalAddress     net.UDPAddr
-	HMIAddress       net.UDPAddr
-	Middleware       *commmiddleware.Middleware
-	requests         []types.RequestMsg
-	pendingResponses [types.MaxQueuedResponses]types.RequestStatus
-	queuedRequests   uint8
-}
-
-func (cu *ControlUnit) getNewRequestID() uint8 {
-	var requestID uint8
-	for k, v := range cu.pendingResponses {
-		if v == types.Free {
-			requestID = uint8(k)
-			break
-		}
-	}
-
-	cu.pendingResponses[requestID] = types.Pending
-	cu.queuedRequests += 1
-	return requestID
-}
-
-func (cu *ControlUnit) removeFromPending(requestID uint8) {
-	cu.pendingResponses[requestID] = types.Free
+	Name           string
+	ID             uint8
+	LocalAddress   net.UDPAddr
+	HMIAddress     net.UDPAddr
+	Middleware     *commmiddleware.Middleware
+	requests       []types.RequestMsg
+	activeRequests uint8
 }
 
 func (cu *ControlUnit) sendMessagePeriodically(minTime int, maxTime int) {
 	for {
-		if cu.queuedRequests < types.MaxQueuedResponses {
+		if cu.activeRequests < types.MaxQueuedResponses {
 			request := cu.getRandomRequest()
 			cu.sendMessage(request)
 		} else {
@@ -59,10 +41,12 @@ func (cu *ControlUnit) sendMessage(request types.RequestMsg) {
 	message := types.Message{
 		Type:              types.Request,
 		ControlUnitID:     cu.ID,
-		RequestID:         cu.getNewRequestID(),
+		RequestID:         uuid.New(),
 		Content:           request.Content,
 		RemoteProcedureID: request.RemoteProcedureID,
 	}
+
+	cu.activeRequests += 1
 	cu.Middleware.SendMessage(message, cu.HMIAddress)
 }
 
@@ -72,9 +56,7 @@ func (cu *ControlUnit) receiveMessageAsync() types.Message {
 		return message
 	}
 
-	//TODO integer
-	cu.removeFromPending(message.RequestID)
-	cu.queuedRequests -= 1
+	cu.activeRequests -= 1
 	return message
 }
 
