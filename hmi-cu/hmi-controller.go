@@ -56,7 +56,7 @@ func (hmi *HMI) SendResponse(request types.Message) {
 }
 
 // Starts a udp server and waits for incoming messages
-func (hmi *HMI) Commloop() int {
+func (hmi *HMI) Commloop() {
 
 	//Start local server to listen to incoming messages
 	go hmi.Middleware.StartUDPServer(hmi.LocalAddress)

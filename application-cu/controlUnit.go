@@ -85,7 +85,7 @@ func (cu *ControlUnit) Mainloop() {
 	fmt.Println("Starting ", cu.Name)
 	go cu.Middleware.StartUDPServer(cu.LocalAddress)
 
-	go cu.sendMessagePeriodically(20, 50)
+	go cu.sendMessagePeriodically(10, 25)
 
 	for {
 		response, received := cu.receiveMessageAsync()
